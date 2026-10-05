@@ -158,3 +158,6 @@ described in [DEBUGGING.md](./Assignments/DEBUGGING.md).
 The procedure for starting a new assignment is described in the [README.md](./Assignments/README.md) file in
 the `Assignments` folder.
 
+If you use AI coding agents (Claude Code, Codex, Copilot, ...), please read [AI_USAGE.md](./Assignments/AI_USAGE.md)
+first. It describes how to use them so that they help you learn rather than do the work for you.
+
