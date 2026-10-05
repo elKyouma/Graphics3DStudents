@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.16)
 
-project(Graphics3DCode CXX C)
+project(Graphics3DStudents CXX C)
 
 add_compile_definitions(ROOT_DIR="${PROJECT_SOURCE_DIR}")
 
