@@ -9,7 +9,7 @@ To download the project you have to clone the repository with Git (how to instal
 in [Building](#building) below):
 
 ```shell
-git clone https://github.com/pbialas7-Lectures/Graphics3DCode.git
+git clone https://github.com/pbialas7-Lectures/Graphics3DStudents.git
 ```
 
 ## OpenGL version

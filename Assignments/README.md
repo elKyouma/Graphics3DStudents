@@ -73,7 +73,7 @@ You can connect the repositories e.g. this way. First clone my repository as des
 file.
 
 ```shell
-git clone https://github.com/pbialas7-Lectures/Graphics3DCode.git
+git clone https://github.com/pbialas7-Lectures/Graphics3DStudents.git
 ```
 
 Check if everything builds all right, then rename the remote repository
