@@ -1,0 +1,8 @@
+# A polished chrome: almost no diffuse reflection, the color comes from the reflected environment (illum 3)
+# weighted by the specular color Ks. There is no ambient term, the environment takes its place.
+newmtl Chrome
+Ka 0.0 0.0 0.0
+Kd 0.02 0.02 0.02
+Ks 0.9 0.9 0.9
+Ns 1000.0
+illum 3

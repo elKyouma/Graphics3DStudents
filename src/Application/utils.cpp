@@ -1,0 +1,263 @@
+//
+// Created by pbialas on 05.08.2020.
+//
+#include "utils.h"
+
+#include <iostream>
+#include <sstream>
+#include <unordered_map>
+
+#include "spdlog/spdlog.h"
+
+#include "glad/gl.h"
+
+#include "Application/shader_source.h"
+
+namespace xe {
+    namespace utils {
+
+        std::string get_gl_version(void) {
+            const GLubyte *version;
+            OGL_CALL(version = glGetString(GL_VERSION));
+            return std::string((const char *) version);
+        }
+
+        int get_gl_version_major(void) {
+            int major;
+            OGL_CALL(glGetIntegerv(GL_MAJOR_VERSION, &major));
+            return major;
+        }
+
+        int get_gl_version_minor(void) {
+            int minor;
+            OGL_CALL(glGetIntegerv(GL_MINOR_VERSION, &minor));
+            return minor;
+        }
+
+        std::string get_gl_vendor(void) {
+            const GLubyte *vendor;
+            OGL_CALL(vendor = glGetString(GL_VENDOR));
+            return std::string((const char *) vendor);
+        }
+
+        std::string get_gl_renderer(void) {
+            const GLubyte *renderer;
+            OGL_CALL(renderer = glGetString(GL_RENDERER));
+            return std::string((const char *) renderer);
+        }
+
+        std::string get_glsl_version(void) {
+            const GLubyte *glsl_version;
+            OGL_CALL(glsl_version = glGetString(GL_SHADING_LANGUAGE_VERSION));
+            return std::string((const char *) glsl_version);
+        }
+
+
+        std::string shader_type(GLenum type) {
+
+            switch (type) {
+                case GL_VERTEX_SHADER:
+                    return "Vertex";
+                case GL_FRAGMENT_SHADER:
+                    return "Fragment";
+                case GL_GEOMETRY_SHADER:
+                    return "Geometry";
+                case GL_COMPUTE_SHADER:
+                    return "Compute";
+                case GL_TESS_CONTROL_SHADER:
+                    return "Tesselation Control";
+                case GL_TESS_EVALUATION_SHADER:
+                    return "Tesselation Evaluation";
+            }
+            return "Unknown";
+        }
+
+        std::string error_msg(GLenum status) {
+            switch (status) {
+                case GL_INVALID_ENUM:
+                    return "INVALID ENUM";
+                case GL_INVALID_VALUE:
+                    return "INVALID VALUE";
+                case GL_INVALID_OPERATION:
+                    return "INVALID OPERATION";
+                case GL_STACK_OVERFLOW:
+                    return "STACK OVERFLOW";
+                case GL_STACK_UNDERFLOW:
+                    return "STACK UNDERFLOW";
+                case GL_OUT_OF_MEMORY:
+                    return "OUT OF MEMORY";
+                case GL_INVALID_FRAMEBUFFER_OPERATION:
+                    return "INVALID FRAMEBUFFER OPERATION";
+                case GL_CONTEXT_LOST:
+                    return "CONTEXT LOST";
+                default:
+                    return "UNKNOWN ERROR";
+            }
+        }
+
+        GLenum
+        get_and_report_error(const std::string function_call, std::string file_name, int line_number, bool critical) {
+            auto error = glGetError();
+            auto error_name = error_msg(error);
+            std::stringstream ss;
+            if (error != GL_NO_ERROR) {
+                ss << "OpenGL error: " << error_name;
+                if (!function_call.empty()) {
+                    ss << "  " << function_call;
+                }
+                if (!file_name.empty()) {
+                    ss << " " << file_name;
+                }
+
+                if (line_number >= 0) {
+                    ss << ":" << line_number;
+                }
+                if (critical) {
+                    spdlog::critical(ss.str());
+                    exit(-1);
+                } else {
+                    spdlog::error(ss.str());
+                }
+            }
+            return error;
+        }
+
+        GLuint link_program(GLuint program) {
+            OGL_CALL(glLinkProgram(program));
+            GLint link_status;
+            OGL_CALL(glGetProgramiv(program, GL_LINK_STATUS, &link_status));
+            if (!link_status) {
+                spdlog::error("Error linking program\n");
+                GLint max_log_length = 0;
+                OGL_CALL(glGetProgramiv(program, GL_INFO_LOG_LENGTH, &max_log_length));
+                std::string info_log;
+                info_log.resize(max_log_length);
+                OGL_CALL(glGetProgramInfoLog(program, max_log_length, &max_log_length, info_log.data()));
+                std::istringstream iss(info_log.substr(0, max_log_length));
+                std::string line;
+                while (std::getline(iss, line)) {
+                    spdlog::error(line);
+                }
+                return 0;
+            }
+
+            return program;
+        }
+
+        void delete_shaders(shader_map_t &shaders) {
+            for (const auto &[shader_type, shader]: shaders) {
+                if (shader > 0)
+                    OGL_CALL(glDeleteShader(shader));
+            }
+        }
+
+        GLuint create_program(const shader_path_map_t &shader_paths) {
+            shader_map_t shaders;
+            for (const auto &[shader_type, path]: shader_paths) {
+                auto shader = create_shader_from_file(shader_type, path);
+                if (shader > 0)
+                    shaders[shader_type] = shader;
+                else {
+                    delete_shaders(shaders);
+                    return 0;
+                }
+            }
+
+            GLuint program;
+            OGL_CALL(program = glCreateProgram());
+            if (program == 0) {
+                spdlog::error("Error creating program");
+                delete_shaders(shaders);
+                return 0;
+            }
+            for (const auto &[shader_type, shader]: shaders) {
+                glAttachShader(program, shader);
+                auto status = glGetError();
+                if (status != GL_NO_ERROR) {
+                    spdlog::error("Error attaching {} shader: {}", utils::shader_type(shader_type), error_msg(status));
+                    OGL_CALL(glDeleteProgram(program));
+                    delete_shaders(shaders);
+                    return 0;
+                }
+            }
+            if (link_program(program) == 0) {
+                spdlog::error("Cannot link program");
+                OGL_CALL(glDeleteProgram(program));
+                delete_shaders(shaders);
+                return 0;
+            }
+            // Shaders are only flagged for deletion here, they are freed when the program is deleted.
+            delete_shaders(shaders);
+            return program;
+        }
+
+        GLuint create_shader_from_source(GLenum type, source_t &shader_source, const std::string &name = "") {
+            if (shader_source.size() == 0) return 0;
+
+            GLuint shader;
+            OGL_CALL(shader = glCreateShader(type));
+            if (shader == 0) {
+                spdlog::error("Error creating {} shader", utils::shader_type(type));
+                return 0;
+            }
+
+            OGL_CALL(glShaderSource(shader, shader_source.size(), shader_source.data(), nullptr));
+
+            OGL_CALL(glCompileShader(shader));
+            GLint is_compiled = 0;
+            OGL_CALL(glGetShaderiv(shader, GL_COMPILE_STATUS, &is_compiled));
+            if (!is_compiled) {
+                GLint max_log_length = 0u;
+                OGL_CALL(glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &max_log_length));
+                std::string error_log;
+                error_log.resize(max_log_length);
+                int length = 0;
+                OGL_CALL(glGetShaderInfoLog(shader, max_log_length, &length, error_log.data()));
+                OGL_CALL(glDeleteShader(shader));
+
+
+                if (name.empty()) {
+                    spdlog::error("Error compiling {} shader", shader_type(type));
+                } else {
+                    spdlog::error("Error compiling {} shader `{}'", shader_type(type), name);
+                }
+                std::istringstream iss(error_log.substr(0, length));
+                std::string line;
+                while (std::getline(iss, line)) {
+                    spdlog::error(line);
+                }
+
+                return 0;
+            }
+            return shader;
+        }
+
+
+        GLuint create_shader_from_file(GLenum type, const std::string &path) {
+            source_t shader_source;
+            shader_source.load(path);
+
+            if (shader_source.size() == 0)
+                return 0;
+
+            return create_shader_from_source(type, shader_source, path);
+        }
+    }
+
+    std::string utils::glfw::platform_name(int platform) {
+        switch (platform) {
+            case GLFW_PLATFORM_WIN32:
+                return "Win32";
+            case GLFW_PLATFORM_COCOA:
+                return "Cocoa";
+            case GLFW_PLATFORM_X11:
+                return "X11";
+            case GLFW_PLATFORM_WAYLAND:
+                return "Wayland";
+            case GLFW_PLATFORM_NULL:
+                return "None";
+            default:
+                return "Unknown";
+        }
+    }
+}

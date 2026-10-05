@@ -1,0 +1,32 @@
+cmake_minimum_required(VERSION 3.15)
+project(application CXX)
+
+file(GLOB IMGUI_SRC ${IMGUI_DIR}/*.cpp)
+
+add_library(${PROJECT_NAME}
+        application.cpp
+        application.h
+        utils.cpp
+        utils.h
+        gl_handle.h
+        shader_source.cpp
+        shader_source.h
+        RegisteredObject.cpp
+        RegisteredObject.h
+        stb.cpp
+        uniforms.h
+        uniforms.cpp
+        ${IMGUI_DIR}/imgui.h
+        ${IMGUI_SRC}
+        ${IMGUI_DIR}/backends/imgui_impl_glfw.h
+        ${IMGUI_DIR}/backends/imgui_impl_glfw.cpp
+        ${IMGUI_DIR}/backends/imgui_impl_opengl3.h
+        ${IMGUI_DIR}/backends/imgui_impl_opengl3.cpp
+        debug.h
+        debug.cpp
+)
+
+target_include_directories(${PROJECT_NAME} PUBLIC ${IMGUI_DIR})
+# The headers include GLAD, GLFW, ImGui and spdlog, so the users of the library need them too.
+target_link_libraries(${PROJECT_NAME} PUBLIC glad glfw glm::glm OpenGL::GL spdlog::spdlog
+        PRIVATE cxxopts::cxxopts ${CMAKE_DL_LIBS})

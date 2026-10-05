@@ -1,0 +1,64 @@
+#pragma once
+
+#include <vector>
+#include <iostream>
+#include <fstream>
+#include <sstream>
+
+namespace xe
+{
+    namespace utils
+    {
+        class source_t
+        {
+        public:
+            source_t() = default;
+
+            // source_t owns the strings it holds, so it can be moved but not copied.
+            source_t(const source_t &) = delete;
+            source_t &operator=(const source_t &) = delete;
+
+            source_t(source_t &&other) noexcept { std::swap(src, other.src); };
+
+            source_t &operator=(source_t &&rhs) noexcept
+            {
+                std::swap(this->src, rhs.src);
+                rhs.clear();
+                return *this;
+            };
+
+            void clear()
+            {
+                for (auto p : src)
+                {
+                    if (p != nullptr)
+                    {
+                        delete[] p;
+                    }
+                }
+                src.clear();
+            }
+            ~source_t() { clear(); }
+
+            void print(std::ostream &stream) const;
+
+            friend std::ostream &operator<<(std::ostream &stream, const source_t &src)
+            {
+                src.print(stream);
+                return stream;
+            };
+
+            bool empty() const { return src.empty(); }
+            size_t size() const { return src.size(); }
+            char *const *data() const { return src.data(); }
+
+            void push_back(char *elem) { src.push_back(elem); }
+
+            void push_back_string(const std::string &str);
+            void load(const std::string &path, bool single_string = false);
+
+        private:
+            std::vector<char *> src;
+        };
+    }
+}

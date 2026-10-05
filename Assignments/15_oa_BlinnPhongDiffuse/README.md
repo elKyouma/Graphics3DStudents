@@ -1,0 +1,333 @@
+# Diffuse lighting
+
+In this assignment we will start to light up the models :) We will begin with the diffuse lighting.
+
+Start by copying the `13_OBJReader` assignment to a new `15_oa_BlinnPhongDiffuse` directory, as described in the
+[Preparing the assignments](../README.md#preparing-the-assignments) section.
+
+## Square
+
+1. It will be easier to debug the lighting if we have a simpler model. Based on the `pyramid.obj` and `pyramid.mtl`
+   create two new files `square.obj` and `square.mtl` that will define a square with `Kd` coefficient set to
+   _silver sand_ color (0.7490, 0.7569, 0.7601). Please disable the back-face culling, as the square is not a closed
+   object. The square should lie in the x-y plane, be centered at the origin and have size 2x2. (The `Models`
+   directory already contains these two files in the form they will have at the end of this assignment; you can
+   compare yours with them, or write yours under different names.)
+2. Set the camera in position (0, 0, 3) with fov 45 degrees and look down at the origin. Set the up vector to (0, 1, 0).
+   You should see something like this:
+   <p align="center"><img alt="square" src="square.png"></p>
+
+## Blinn-Phong material
+
+We will use the Blinn-Phong lighting model given by the equation:
+<p align="center"><img alt="Blinn-Phong lighting equation" src="phong.png" width="40%"></p>
+
+In this assignment we will only use the first two terms of the equation, the ambient and diffuse lighting.
+
+1. Start by copying the files `KdMaterial.h` and `KdMaterial.cpp` to `BlinnPhongMaterial.h` and `BlinnPhongMaterial.cpp`
+   respectively. Change each occurrence of `KdMaterial` to `BlinnPhongMaterial` in the new files. In the
+   `SimpleShapeApplication::init` method add
+   ```c++
+   xe::BlinnPhongMaterial::init();
+   ```
+   at the beginning of the method, and include the `Engine/BlinnPhongMaterial.h` header in `app.cpp`.
+   As with `KdMaterial.cpp`, re-run CMake after creating `BlinnPhongMaterial.cpp`, so that it is compiled into the
+   `Engine` library.
+   In the file `square.mtl` change the `illum 0` to `illum 1` and add the `Ka` coefficient with same value as `Kd`.
+
+   The `Kd` coefficient corresponds to the `c_diff` variable in the lighting equation and
+   the `Ka` coefficient corresponds to the `c_ambient` variable.
+
+   Everything should look as previously, but a warning is printed that the material needs normals and that
+   `KdMaterial` is used instead. Lighting needs normal vectors, and your `square.obj` does not have them yet, so the OBJ
+   loader falls back to `KdMaterial` (see `Engine/mesh_loader.cpp`). The square will be drawn with the
+   `BlinnPhongMaterial` once we add the normals in the [Normal vectors](#normal-vectors) section. (If you use the
+   `square.obj` file from the `Models` directory, it already has the normals, and there is no warning.)
+
+2. Copy the `Kd_vs.glsl` and `Kd_fs.glsl` shader files to `BlinnPhong_vs.glsl` and `BlinnPhong_fs.glsl` respectively. In
+   the `BlinnPhongMaterial::init` method change the shader names to the new ones. In the `BlinnPhong_fs.glsl` file
+   rename the `KdMaterial` interface block to `BlinnPhongMaterial`.
+
+3. Add `Ka_` field of `glm::vec4` in `BlinnPhongMaterial` class.
+4. In the `create_from_mtl` method of this class assign `get_color(mat.ambient)` to this field. Like `mat.diffuse`,
+   `mat.ambient` is a `float[3]` array. Like `Kd`, the `Ka` color from the MTL file is in sRGB space, so convert it to
+   linear space with `srgb_inverse_gamma_correction` as well.
+5. Check that the `init` method of this class registers this factory method:
+   ```c++
+   xe::add_mat_function("BlinnPhongMaterial", BlinnPhongMaterial::create_from_mtl);
+   ```
+   If you have replaced every occurrence of `KdMaterial` in step 1, including the one in the string, this line is
+   already there. The OBJ loader uses this factory for materials with `illum 1`, `illum 2` or `illum 3`, provided the
+   mesh has normal vectors.
+
+6. In the `BlinnPhongMaterial` interface block in the `BlinnPhong` fragment shader add a `vec4 Ka` field at the
+   beginning of the block.
+   Modify the block size and loading accordingly: now `Ka` is at offset 0, `Kd` at 16, `use_vertex_colors` at 32 and
+   `use_map_Kd` at 36, so the block takes `3*sizeof(glm::vec4)` bytes. You can check this with `uniform_info`.
+
+   Everything should still look as previously, as the square is still drawn with `KdMaterial`.
+
+Now we have a base to start implementing the diffuse lighting.
+
+## Normal vectors
+
+As I hope you remember, for lighting we need to know normal vectors of the surface. In this case, it is particularly
+simple as a square is flat. The normal vector is the same for all vertices, and it is perpendicular to the surface.
+
+1. Add the normal vector in the `square.obj` file:
+   ```obj
+   vn 0.0 0.0 1.0
+   ```
+   and the index of this normal vector to every vertex in the face definitions:
+   ```obj
+   f 1//1 2//1 3//1
+   ```
+   We add the index after two slashes `//` to indicate that we do not have texture coordinates.
+   The warning about the missing normals should disappear: now the square is drawn with the `BlinnPhongMaterial`. As
+   its shaders do not use the lighting yet, nothing else should change. If the square looks different, check the
+   layout of the `BlinnPhongMaterial` block from step 6 of the previous section.
+
+2. In `BlinnPhong_vs.glsl` vertex shader file please add the `a_vertex_normal` attribute of type `vec3`
+   with `location=1`. Pass this attribute to the fragment shader with the name `vertex_normal_vs`. The `vs` suffix
+   stands for "view space," as those are the coordinates that we will use for the lighting calculations.
+
+3. Interpolating vectors can destroy their normalization, so we have to normalize the normal vector again in the
+   fragment shader. In the `main` function add:
+   ```glsl
+   vec3 normal = normalize(vertex_normal_vs);
+   ```
+4. Use the `normal` variable to set the color of the fragment in the fragment shader. You should see a blue square. The
+   color should not change when you rotate the camera.
+
+## Vertex positions
+
+We will also need the vertex positions in the fragment shader. We already have this attribute in the vertex shader, but
+we must pass it to the fragment shader.
+
+1. Please do this using the variable `vertex_position_vs` of type `vec3` to which you will assign the `xyz` components
+   of the `a_vertex_position` attribute.
+2. In the fragment shader assign the absolute value of this variable to the `rgb` components of the pixel color.
+   ```glsl
+   vFragColor.rgb = abs(vertex_position_vs);
+   ```
+   You should see something like this:
+   <p align="center"><img alt="vertex positions" src="positions.png"></p>
+
+   The color should not change when you rotate the camera.
+
+## Transformations to the view space
+
+The next step is to transform the vertex positions and normal vectors to view space.
+
+### Positions
+
+1. We will start with positions. Positions are transformed using the `V*M` matrix, so please add this matrix to
+   the `Transformations` interface block in the vertex shader
+   ```glsl
+   mat4 VM;
+   ```
+   below the `PVM` matrix.
+
+2. In the `init` method of the `SimpleShapeApplication` allocate enough space for the additional `VM` matrix.
+
+3. In the `SimpleShapeApplication::frame` method set the `VM` matrix to identity and pass it to the shader.
+
+4. In the vertex shader multiply `a_vertex_position` by the `VM` matrix and assign the result to the
+   `vertex_position_vs` variable.
+   ```glsl
+   vec4 position_vs = VM * a_vertex_position;
+   vertex_position_vs = position_vs.xyz / position_vs.w;
+   ```
+   You should get the same picture as before.
+
+5. In the `SimpleShapeApplication::frame` method compute the `VM` matrix and pass it to the shader. Now the color
+   pattern should change when you rotate the camera.
+
+### Normals
+
+The normal vector is a direction vector, so it is transformed using a 3x3 `VM_normal` matrix defined as follows:
+
+```c++
+auto R = glm::mat3(VM);
+auto VM_normal = glm::mat3(glm::cross(R[1], R[2]), glm::cross(R[2], R[0]), glm::cross(R[0], R[1]));
+```
+
+The transformed normal vector must be normalized again after the transformation.
+
+1. Add the `VM_normal` matrix to the `Transformations` interface block in the vertex shader
+   ```glsl
+   mat3 VM_normal;
+   ```
+   below the `VM` matrix.
+2. In the `init` method of the `SimpleShapeApplication` allocate enough space for the additional `VM_normal` matrix.
+   Remember that because of the std140 layout a 3x3 matrix is stored as three columns of four floats, i.e. it takes
+   `3*sizeof(glm::vec4)` bytes. Together with `PVM` and `VM` the block takes 176 bytes.
+
+3. In the `SimpleShapeApplication::frame` method set the `VM_normal` matrix to identity and pass it to the shader. The
+   std140 layout mandates that a 3x3 matrix is stored as three columns, each column aligned to the `4*sizeof(float)`
+   boundary. So matrix
+   ```text
+      VM_normal = [
+      00 01 02
+      10 11 12
+      20 21 22]
+   ```
+   is stored as
+   ```text
+   [00 10 20 _ 01 11 21 _ 02 12 22 _]
+   ```
+   with `_` denoting the "empty" space of size `sizeof(float)`. To get a pointer to column `k` use `&VM_normal[k]`.
+
+4. In the vertex shader multiply `a_vertex_normal` by the `VM_normal` matrix and assign the result to the
+   `vertex_normal_vs` variable.
+   ```glsl
+   vertex_normal_vs = normalize(VM_normal * a_vertex_normal);
+   ```
+
+5. In the fragment shader assign the `abs(vertex_normal_vs)` to the `rgb` components of the pixel color. You should see
+   a blue square again.
+
+6. In the `SimpleShapeApplication::frame` method compute the `VM_normal` matrix and pass it to the shader. Now the
+   color of the square should change when you rotate the camera.
+
+7. Assign again the proper colors to the `vFragColor` variable in the fragment shader.
+
+## Lights
+
+### Ambient
+
+We will start with the ambient light. The ambient light is a constant light that is added to the scene regardless of the
+position of the light source. It's a "poor man's" implementation of global illumination and represents the light that is
+reflected from other objects in the scene.
+
+1. In the `BlinnPhong_fs.glsl` fragment shader add a uniform interface block containing just the ambient light value:
+   ```glsl
+   layout (std140, binding = 2) uniform Lights {
+     vec3 ambient;
+   };
+   ```
+2. In the `SimpleShapeApplication` class add field
+   ```c++
+   xe::gl::Buffer u_light_buffer_handle_;
+   ```
+   Like the transformations buffer since the `13_OBJReader` assignment, it owns the buffer and deletes it.
+3. In the `init` method of this class add the code that creates a uniform buffer and initializes this field.
+4. In the `frame` method load value (0.25, 0.25, 0.25) into `ambient` field of this buffer. Before drawing, bind this
+   buffer to the binding point 2 of the `Lights` block, as you do with the transformations buffer and the binding
+   point 1:
+   ```c++
+   OGL_CALL(glBindBufferBase(GL_UNIFORM_BUFFER, 2, u_light_buffer_handle_.get()));
+   ```
+   and unbind it after drawing.
+
+5. In the fragment shader assign the product of `Ka` and `ambient` to the `rgb` components of `vFragColor`
+   (`Ka` is a `vec4` and `ambient` a `vec3`):
+   ```glsl
+   vFragColor.rgb = Ka.rgb * ambient;
+   ```
+   You should see a dark, but not black, square.
+
+### Point light source
+
+The point light source is the simplest light source. It is defined by its position, color, intensity and radius. In
+the `Engine` directory you will find the `light.h` header file with the definition of class `PointLight`. The `alignas`
+qualifiers make sure that this class conforms to `std140` and can be directly copied to light uniform buffer.
+
+1. Please add the corresponding structure in the fragment shader
+   ```glsl
+   struct PointLight {
+     vec3 position;
+     float radius;
+     vec3 color;
+     float intensity;
+   };
+   ```
+2. Then change the `Lights` uniform interface block to
+   ```glsl
+   const int MAX_POINT_LIGHTS = 16;
+
+   layout (std140, binding = 2) uniform Lights {
+     vec3 ambient;
+     int n_lights;
+     PointLight lights[MAX_POINT_LIGHTS];
+   };
+   ```
+3. Add a field
+   ```c++
+   std::vector<xe::PointLight> lights_;
+   ```
+   in the `SimpleShapeApplication` class (include the `Engine/light.h` header in `app.h`) and corresponding
+   ```c++
+   void add_light(xe::PointLight light) { lights_.push_back(light); }
+   ```
+   method.
+4. Modify the size of the `Lights` uniform buffer accordingly. The maximum number of lights is defined in `light.h`
+   ```c++
+   const GLuint MAX_POINT_LIGHTS = 16;
+   ```
+   According to `std140`, `n_lights` fits into the unused last four bytes of `ambient` (offset 12), and the array of
+   lights starts at offset 16. Each `PointLight` takes 32 bytes, so the whole block takes
+   `4*sizeof(float) + MAX_POINT_LIGHTS*sizeof(xe::PointLight)` = 528 bytes.
+
+5. Add a white light at position `(0,0,1)` with intensity `1.0` and radius `0.1`. Note that the arguments of the
+   `PointLight` constructor are in a different order than its fields: position, color, intensity and radius:
+   ```c++
+   add_light(xe::PointLight({0.0f, 0.0f, 1.0f}, {1.0f, 1.0f, 1.0f}, 1.0f, 0.1f));
+   ```
+
+6. In the `frame` method load the number of lights (the size of the `lights_` vector) into the lights uniform buffer.
+   The `n_lights` variable in the shader is an `int`, while `lights_.size()` returns `std::size_t`, which has eight
+   bytes. So first convert the size to an `int` variable and load that. Also make sure that you never load more than
+   `MAX_POINT_LIGHTS` lights, as they would not fit into the buffer:
+   ```c++
+   int n_lights = static_cast<int>(std::min<std::size_t>(lights_.size(), xe::MAX_POINT_LIGHTS));
+   ```
+
+7. In the `frame` method add a loop that will load each light from the `lights_` vector to the lights uniform buffer.
+   Before loading the light transform it from world space to the view space using the `transform` function
+   provided in the `light.h` file. The light positions are given in world space, so use the view matrix of the camera
+   `camera()->view()`, not `VM`.
+
+8. In the fragment shader add the contribution of each light to the fragment color using the diffuse part of the formula
+   presented above. Remember the 1/pi factor. Accumulate the result in a local variable, starting with the ambient
+   term, and apply the gamma correction only to the final sum:
+   ```glsl
+   vec3 frag_color = Ka.rgb * ambient;
+   for (int i = 0; i < n_lights; i++) {
+       vec3 light_vector = lights[i].position - vertex_position_vs;
+       float light_distance = length(light_vector);
+       vec3 light_dir = light_vector / light_distance;
+       float diffuse = max(dot(normal, light_dir), 0.0);
+       frag_color += INV_PI * color.rgb * lights[i].color * lights[i].intensity * diffuse;
+   }
+   vFragColor.rgb = srgb_gamma_correction(frag_color);
+   ```
+   where `color` is the diffuse color (`Kd`, multiplied by vertex and texture colors if present) and `INV_PI` is a
+   constant equal to 1/pi that you have to define. The alpha component of `vFragColor` stays as in the `Kd` shader,
+   `vFragColor.a = color.a;`.
+9. Add light attenuation according to the formula
+   ```glsl
+   float r = max(lights[i].radius, light_distance);
+   float attenuation = 1.0 / (r * r);
+   ```
+   where `light_distance` is the distance from the light to the fragment computed in the previous step. Multiply the
+   contribution of the light calculated in the previous step by `attenuation`.
+
+   This is the inverse-square law of a point light. The distance is clamped to the radius of the light, so that the
+   attenuation does not grow without bound close to the light. Point lights, their units and their attenuation are
+   discussed in detail in S. Lagarde and C. de Rousiers, [_Moving Frostbite to Physically Based Rendering_](https://seblagarde.wordpress.com/wp-content/uploads/2015/07/course_notes_moving_frostbite_to_pbr_v32.pdf), SIGGRAPH 2014 course notes.
+
+## Back faces
+
+When turning the camera, you will notice that the back face of the square is also lit. This is because the normal vector
+is the same as for the front face. We can fix this by using the `gl_FrontFacing` variable that is set to `true` if the
+fragment belongs to the front face and `false` otherwise. We can use this variable to flip the normal vector if the
+fragment belongs to the back face. In the fragment shader, please add the following code:
+
+```glsl
+if (!gl_FrontFacing) {
+  normal = -normal;
+}
+```
+
+Now the back face should be dark.
