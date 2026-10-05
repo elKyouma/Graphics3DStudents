@@ -16,8 +16,8 @@ versions pinned in the top `CMakeLists.txt`; the others are included in the `src
 | [MikkTSpace](#mikktspace)                  | computing tangents for normal mapping      |           | `src/3rdParty/MIKKTSpace`  | zlib-style                     |
 | [RenderDoc](#renderdoc)                    | frame capture API                          | API 1.6.0 | `src/3rdParty/RenderDoc`   | MIT                            |
 
-To update a downloaded library, change its `GIT_TAG` in the top `CMakeLists.txt` and configure the project from
-scratch.
+The downloaded libraries are fetched as release archives of tagged versions. To update a library, change the version
+in its `URL` in the top `CMakeLists.txt` and configure the project from scratch.
 
 ## GLFW
 

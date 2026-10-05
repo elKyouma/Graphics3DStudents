@@ -25,7 +25,8 @@ CMake knobs in the top `CMakeLists.txt`:
 - `set(MINOR 6)` → `5` for GPUs/drivers without OpenGL 4.6. Selects the GLAD loader in `src/3rdParty/glad/glad_<MAJOR>_<MINOR>`.
 - `-DGLAD_DEBUG=ON` uses the `_debug` GLAD variant that checks errors after every GL call.
 - `WINDOW_WIDTH`/`WINDOW_HEIGHT`, `MAJOR`/`MINOR`, `ROOT_DIR` (repo root, for locating `Models/`) are passed as compile definitions.
-- Dependency versions are pinned by `GIT_TAG`; changing one requires reconfiguring from scratch.
+- Dependencies are release archives of tags (`URL .../archive/refs/tags/<tag>.tar.gz`); changing one requires
+  reconfiguring from scratch.
 
 Runtime shortcuts in every program: Ctrl-Q quit, Ctrl-S screenshot (`screenshot_<n>.png` in cwd), Ctrl-F RenderDoc capture (Linux).
 
