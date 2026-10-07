@@ -56,51 +56,46 @@ set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 
-# Dependencies are pinned to release tags, so everyone builds against the same versions.
-# To update a library, change its GIT_TAG and configure the project from scratch.
+# Dependencies are downloaded as release archives of tagged versions, so everyone builds against the same versions.
+# To update a library, change the tag in its URL and configure the project from scratch.
+
+# Give extracted files the extraction time, so changing a URL triggers a rebuild.
+if (POLICY CMP0135)
+    cmake_policy(SET CMP0135 NEW)
+endif ()
 
 # GLFW
 FetchContent_Declare(
         glfw
-        GIT_REPOSITORY https://github.com/glfw/glfw.git
-        GIT_TAG 3.5.1
-        GIT_SHALLOW TRUE
+        URL https://github.com/glfw/glfw/archive/refs/tags/3.5.1.tar.gz
 )
 FetchContent_MakeAvailable(glfw)
 
 # GLM
 FetchContent_Declare(
         glm
-        GIT_REPOSITORY https://github.com/g-truc/glm.git
-        GIT_TAG 1.0.3
-        GIT_SHALLOW TRUE
+        URL https://github.com/g-truc/glm/archive/refs/tags/1.0.3.tar.gz
 )
 FetchContent_MakeAvailable(glm)
 
 # SPDLOG
 FetchContent_Declare(
         spdlog
-        GIT_REPOSITORY https://github.com/gabime/spdlog.git
-        GIT_TAG v1.17.0
-        GIT_SHALLOW TRUE
+        URL https://github.com/gabime/spdlog/archive/refs/tags/v1.17.0.tar.gz
 )
 FetchContent_MakeAvailable(spdlog)
 
 # CXXOPTS
 FetchContent_Declare(
         cxxopt
-        GIT_REPOSITORY https://github.com/jarro2783/cxxopts.git
-        GIT_TAG v3.3.1
-        GIT_SHALLOW TRUE
+        URL https://github.com/jarro2783/cxxopts/archive/refs/tags/v3.3.1.tar.gz
 )
 FetchContent_MakeAvailable(cxxopt)
 
 # IMGUI
 FetchContent_Declare(
         imgui
-        GIT_REPOSITORY https://github.com/ocornut/imgui
-        GIT_TAG v1.92.9b
-        GIT_SHALLOW TRUE
+        URL https://github.com/ocornut/imgui/archive/refs/tags/v1.92.9b.tar.gz
 )
 FetchContent_MakeAvailable(imgui)
 
