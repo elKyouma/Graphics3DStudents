@@ -39,6 +39,22 @@ The object is deleted when its last owner is destroyed, so the owner must live a
 must be destroyed while the OpenGL context still exists. Fields of `SimpleShapeApplication` and of the materials
 satisfy both: they are destroyed when the application or the material is, before the window and its context.
 
+To see why, follow what happens to `app` in `main`:
+
+1. `app.run()` ends by calling `cleanup()`, which deletes all the `RegisteredObject`s, i.e. the meshes and the
+   materials together with their fields.
+2. At the end of `main` the `app` object is destroyed. In C++ an object of a derived class is destroyed in the
+   reverse order of its construction: first the body of the `~SimpleShapeApplication()` destructor runs, then the
+   fields of `SimpleShapeApplication` are destroyed (in the reverse order of their declaration), so
+   `u_trans_buffer_handle_` deletes its buffer here.
+3. Only then does the destructor of the base class, `~Application()`, run, and it destroys the window and its
+   OpenGL context.
+
+The base class is constructed first and destroyed last, so the context created in the `Application` constructor
+outlives every field of the derived class. This holds only for the fields of the application object itself. An
+owner with static storage duration, e.g. a global variable or a `static` field, is destroyed after `main` returns,
+when the context no longer exists, so do not store a `gl::` handle in one.
+
 1. Start with the transformations uniform buffer: change the type of the `u_trans_buffer_handle_` field in `app.h`
    from `GLuint` to `xe::gl::Buffer` (include `Application/gl_handle.h`). Create the buffer with
    `glCreateBuffers(1, u_trans_buffer_handle_.put())` and use `u_trans_buffer_handle_.get()` wherever the name is
