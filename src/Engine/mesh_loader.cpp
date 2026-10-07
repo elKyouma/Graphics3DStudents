@@ -7,6 +7,8 @@
 
 #include "mesh_loader.h"
 
+#include <unordered_map>
+
 #include <filesystem>
 #include <memory>
 
@@ -156,8 +158,18 @@ namespace xe {
         mesh->unmap_vertex_buffer();
 
 
+        // Submeshes are split at every usemtl, so the same material can come up several times. Create it once and
+        // share it, so its textures are not loaded again. The materials are owned by the RegisteredObject registry.
+        std::unordered_map<int, Material *> materials;
+
         for (int i = 0; i < smesh.submeshes.size(); i++) {
             auto sm = smesh.submeshes[i];
+
+            auto cached = materials.find(sm.mat_idx);
+            if (cached != materials.end()) {
+                mesh->add_submesh(3 * sm.start, 3 * sm.end, cached->second);
+                continue;
+            }
 
             Material *material = nullptr;
             if (sm.mat_idx >= 0) {
@@ -193,6 +205,7 @@ namespace xe {
                                                               smesh.materials[sm.mat_idx].name, i, path));
             }
 
+            materials[sm.mat_idx] = material;
             SPDLOG_DEBUG("Adding primitive {:4d} {:4d} {:4d}", i, 3 * sm.start, 3 * sm.end);
             mesh->add_submesh(3 * sm.start, 3 * sm.end, material);
         }

@@ -213,6 +213,7 @@ namespace xe {
         void loop(); // main loop
 
         unsigned int screenshot_n_; // number of the next screenshot
+        int mouse_buttons_down_ = 0; // buttons pressed outside ImGui and not yet released, motion is passed while > 0
         bool screenshot_requested_ = false; // set by Ctrl-S, the screenshot is taken after the next frame()
 
         // RenderDoc in-application capture support (see application.cpp).

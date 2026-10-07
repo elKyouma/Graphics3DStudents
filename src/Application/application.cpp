@@ -389,10 +389,11 @@ void xe::Application::glfw_scroll_callback(GLFWwindow *window_ptr, double xoffse
 }
 
 void xe::Application::glfw_cursor_position_callback(GLFWwindow *window, double x, double y) {
-    if (ImGui::GetIO().WantCaptureMouse) {
+    auto app_ptr = reinterpret_cast<Application *>(glfwGetWindowUserPointer(window));
+    // Motion is also passed while a drag that started outside ImGui is in progress, even over an ImGui window.
+    if (ImGui::GetIO().WantCaptureMouse && !(app_ptr && app_ptr->mouse_buttons_down_ > 0)) {
         return;
     }
-    auto app_ptr = reinterpret_cast<Application *>(glfwGetWindowUserPointer(window));
     if (app_ptr) {
         app_ptr->cursor_position_callback(x, y);
     }
@@ -404,6 +405,11 @@ void xe::Application::glfw_mouse_button_callback(GLFWwindow *window, int button,
     }
     auto app_ptr = reinterpret_cast<Application *>(glfwGetWindowUserPointer(window));
     if (app_ptr) {
+        if (action == GLFW_PRESS) {
+            ++app_ptr->mouse_buttons_down_;
+        } else if (action == GLFW_RELEASE && app_ptr->mouse_buttons_down_ > 0) {
+            --app_ptr->mouse_buttons_down_;
+        }
         app_ptr->mouse_button_callback(button, action, mods);
     }
 }
