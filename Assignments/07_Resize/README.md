@@ -10,20 +10,20 @@ Please change the location of the camera in the `init` method of the `SimpleShap
 looking at (0,0,0) with up vector (0,0,1).
 Now the pyramid should be visible from the side.
 
-Try to resize the display window. Currently, resizing the window changes the canvas size of the displayed image. The
-pyramid remains all the time in the same place without changing. If we reduce the size of the window some portions of
-the pyramid may be cut out. This happens because the size of the viewport was set once in the `init` method and is not
-changed during the application execution. The portions of the display window (framebuffer) that are outside the viewport
-are just filled with background color. The portions of the viewport that are outside the framebuffer are simply not
-displayed. We will change this behavior so as to rescale the displayed objects when the window is resized.
+Try to resize the display window. The `Application` class keeps the OpenGL viewport equal to the size of the
+framebuffer (the part of the window we draw to), so the pyramid scales together with the window. However, its
+proportions are not preserved. That is because the aspect ratio of the viewport changes with the window, while the
+aspect ratio of the perspective projection set up in the call to the `glm::perspective` function in the `init` method
+stays the same. We will change this so that the projection follows the size of the window.
 
 For this purpose, we will use the virtual method
 `Application::framebuffer_resize_callback(int w, int h)`, which is called during each frame buffer size change with
-the `w` and `h` parameters defining the new buffer sizes.
+the `w` and `h` parameters defining the new buffer sizes. The `Application` class has already updated the viewport
+when it is called.
 This method can be overridden in classes derived from the `Application` class, such as
 `SimpleShapeApplication`, which you use in your exercises.
 
-1. We will start with resizing the viewport to the size of the framebuffer each time framebuffer is resized. To do this first add
+1. First add
    ```c++
    void framebuffer_resize_callback(int w, int h) override;
    ```
@@ -35,9 +35,6 @@ This method can be overridden in classes derived from the `Application` class, s
        Application::framebuffer_resize_callback(w, h);
    }
    ```
-   This will not yet change the behavior of the application, so add the `glViewport` call to this method to set the
-   viewport to the size of the framebuffer. As always, wrap it in `OGL_CALL`.
-
    When the window is minimized, the framebuffer can have zero size (this happens e.g. on Windows). Such a size is not
    useful for rendering, and later on it would make the aspect ratio `w/h` undefined, so ignore it by returning early
    at the beginning of the method, after calling the base class method:
@@ -45,11 +42,6 @@ This method can be overridden in classes derived from the `Application` class, s
    if (w <= 0 || h <= 0)
        return;
    ```
-
-   Try to resize the window. What happens? If you have done everything correctly, the pyramid should scale with the size
-   of the window. However, the proportions of the pyramid are not preserved. That is because the aspect ratio of the
-   viewport no longer matches the aspect ratio of the perspective projection set up in the call to the `glm::perspective`
-   function in the `init` method.
 
 2. To preserve the proportions of the pyramid, we need to change the aspect ratio of the perspective projection each time the
    framebuffer is resized. Because that means changing the perspective matrix from within
@@ -72,8 +64,8 @@ This method can be overridden in classes derived from the `Application` class, s
 
    ```
 
-   In the `init` method of the `app.cpp` please assign the same values to them as before and change the code accordingly to use
-   those new fields.
+   In the `init` method of the `app.cpp` please assign the same values to them as before (remember that the field of view is stored in
+   radians, e.g. `fov_ = glm::radians(45.0f)`) and change the code accordingly to use those new fields.
    Please delete the unnecessary code from the `init` method i.e., the `M`, `V` and `P` variables.
 
    At this point we still create the PVM matrix in the  `init` method and send it to the uniform buffer there.

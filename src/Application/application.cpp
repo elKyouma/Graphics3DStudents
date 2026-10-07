@@ -158,6 +158,13 @@ xe::Application::Application(int width, int height, std::string title, bool debu
 
         init_renderdoc();
 
+        // The viewport must cover the whole framebuffer. Its default is the window size at context creation,
+        // which differs from the current one if the window manager resized the window or scaled it for a HiDPI screen.
+        {
+            auto [fb_w, fb_h] = frame_buffer_size();
+            OGL_CALL(glViewport(0, 0, fb_w, fb_h));
+        }
+
         OGL_CALL(glClearColor(1.0f, 1.0f, 1.0f, 1.0f));
         OGL_CALL(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
 
@@ -369,6 +376,8 @@ void xe::Application::loop() {
 
 void xe::Application::glfw_framebuffer_size_callback(GLFWwindow *window_ptr, int w, int h) {
     auto app_ptr = reinterpret_cast<Application *>(glfwGetWindowUserPointer(window_ptr));
+    // Keep the viewport equal to the framebuffer; the application can still change it in its own callback.
+    OGL_CALL(glViewport(0, 0, w, h));
     if (app_ptr) {
         app_ptr->framebuffer_resize_callback(w, h);
     }
