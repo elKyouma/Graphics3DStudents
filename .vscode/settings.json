@@ -1,0 +1,29 @@
+{
+  "cmake.options.statusBarVisibility": "visible",
+  "cmake.options.advanced": {
+    "kit":          { "statusBarVisibility": "visible" },
+    "variant":      { "statusBarVisibility": "visible" },
+    "build":        { "statusBarVisibility": "visible" },
+    "buildTarget":  { "statusBarVisibility": "visible" },
+    "launchTarget": { "statusBarVisibility": "visible" },
+    "debug":        { "statusBarVisibility": "visible" },
+    "launch":       { "statusBarVisibility": "visible" },
+    "ctest":        { "statusBarVisibility": "hidden" },
+    "testPreset":   { "statusBarVisibility": "hidden" }
+  },
+  "cmake.buildDirectory": "${workspaceFolder}/build",
+  "cmake.configureOnOpen": true,
+  "[markdown]": {
+    "editor.wordWrap": "on",
+    "editor.rulers": [120]
+  },
+  "cmake.defaultVariants": {
+    "buildType": {
+      "default": "debug",
+      "choices": {
+        "debug":   { "short": "Debug",   "buildType": "Debug" },
+        "release": { "short": "Release", "buildType": "Release" }
+      }
+    }
+  }
+}

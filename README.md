@@ -91,6 +91,9 @@ The `-j 4` option builds with four parallel jobs; you can use more if your compu
 While you may work via command line and your preferred text editor, it is much more comfortable to use an IDE. I
 recommend [Visual Studio Code](https://code.visualstudio.com/) which is available on Linux and Windows.
 
+A step-by-step description of the VS Code setup, including the status bar and troubleshooting, is in
+[VSCODE.md](./VSCODE.md). A short summary follows.
+
 After installing VS Code, use it to open a folder containing the project repository.
 You should install the recommended extensions. The list is in the `.vscode/extensions.json` file, but you should be
 prompted to do this after opening the
