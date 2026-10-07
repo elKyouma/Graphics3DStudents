@@ -81,29 +81,35 @@ when the context no longer exists, so do not store a `gl::` handle in one.
 2. Add the definition of this function in the `texture.cpp` file. This function should take the name of the texture file
    and return a `gl::Texture` owning the new texture: create it with `glGenTextures(1, texture.put())` and end with
    `return texture;`.
+
    Use the code creating the texture that was previously in the `app.cpp` file; `texture.cpp` has to include the
-   `stb/stb_image.h` header. As before, choose the formats
-   depending on the number of channels of the image: the format of the data is `GL_RGB` for three and `GL_RGBA` for
-   four channels. If `is_sRGB` is `true`, the internal format should be `GL_SRGB8` or `GL_SRGB8_ALPHA8`, otherwise
-   `GL_RGB8` or `GL_RGBA8`. Remember to free the image with `stbi_image_free` after loading it into the texture.
+   `stb/stb_image.h` header.
 
-   This time also create the mipmaps. A mipmap is a sequence of smaller and smaller copies of the texture, each half
-   the size of the previous one, with every texel the average of four texels of the larger copy. When the texture is
-   seen from far away, so that many texels fall into one pixel, the sampler reads the copy of the matching size
-   instead of picking a few texels of the full texture. Without mipmaps such textures shimmer and show moiré patterns
-   when the camera moves. After `glTexImage2D` call `glGenerateMipmap(GL_TEXTURE_2D)`, which computes all the copies,
-   and set `GL_TEXTURE_MIN_FILTER` to `GL_LINEAR_MIPMAP_LINEAR`, which interpolates within and between the two
-   nearest copies. `GL_TEXTURE_MAG_FILTER` stays `GL_LINEAR`: mipmaps are only used when the texture is shrunk. To see
-   the difference, zoom out the Earth with and without the mipmaps.
+   As before, choose the formats depending on the number of channels of the image: the format of the data is
+   `GL_RGB` for three and `GL_RGBA` for four channels. If `is_sRGB` is `true`, the internal format should be
+   `GL_SRGB8` or `GL_SRGB8_ALPHA8`, otherwise `GL_RGB8` or `GL_RGBA8`.
 
-   If the image cannot be loaded, do not exit the program as before, but print an error message and return an empty
-   handle, `return {};`. The callers can check for it with `if (texture)` (see the `create_from_mtl` code in the next
-   section).
+   Remember to free the image with `stbi_image_free` after loading it into the texture.
 
    The `Engine` library collects its source files using `file(GLOB ...)`, so after creating `texture.cpp` you have to
    re-run CMake, as you did after creating `KdMaterial.cpp`.
 
-3. In the `app.cpp` file, use this newly defined function to load the texture. The `KdMaterial` constructor takes a
+3. This time also create the mipmaps. A mipmap is a sequence of smaller and smaller copies of the texture, each half
+   the size of the previous one, with every texel the average of four texels of the larger copy. When the texture is
+   seen from far away, so that many texels fall into one pixel, the sampler reads the copy of the matching size
+   instead of picking a few texels of the full texture. Without mipmaps such textures shimmer and show moiré patterns
+   when the camera moves.
+
+   After `glTexImage2D` call `glGenerateMipmap(GL_TEXTURE_2D)`, which computes all the copies, and set
+   `GL_TEXTURE_MIN_FILTER` to `GL_LINEAR_MIPMAP_LINEAR`, which interpolates within and between the two nearest
+   copies. `GL_TEXTURE_MAG_FILTER` stays `GL_LINEAR`: mipmaps are only used when the texture is shrunk. To see the
+   difference, zoom out the Earth with and without the mipmaps.
+
+4. If the image cannot be loaded, do not exit the program as before, but print an error message and return an empty
+   handle, `return {};`. The callers can check for it with `if (texture)` (see the `create_from_mtl` code in the next
+   section).
+
+5. In the `app.cpp` file, use this newly defined function to load the texture. The `KdMaterial` constructor takes a
    plain `GLuint`, so pass it `texture.get()`; the material only uses the texture, it does not own it. The texture
    must therefore be owned by something that lives as long as the material: keep it in a field
    `xe::gl::Texture texture_;` of `SimpleShapeApplication`. If you kept it in a local variable of `init`, it would be
