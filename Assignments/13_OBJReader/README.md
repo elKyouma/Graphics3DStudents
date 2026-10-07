@@ -45,8 +45,8 @@ To see why, follow what happens to `app` in `main`:
    materials together with their fields.
 2. At the end of `main` the `app` object is destroyed. In C++ an object of a derived class is destroyed in the
    reverse order of its construction: first the body of the `~SimpleShapeApplication()` destructor runs, then the
-   fields of `SimpleShapeApplication` are destroyed (in the reverse order of their declaration), so
-   `u_trans_buffer_handle_` deletes its buffer here.
+   fields of `SimpleShapeApplication` are destroyed (in the reverse order of their declaration), so a `gl::` handle
+   that is a field of the application deletes its object here.
 3. Only then does the destructor of the base class, `~Application()`, run, and it destroys the window and its
    OpenGL context.
 
