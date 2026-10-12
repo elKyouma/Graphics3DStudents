@@ -14,7 +14,7 @@ namespace xe {
     Mesh::Mesh(GLsizei stride, GLsizei v_buffer_size, GLenum v_buffer_hint,
                GLsizei i_buffer_size, GLenum index_type, GLenum i_buffer_hint) :
             index_type_(index_type), stride_(stride) {
-        OGL_CALL(glGenVertexArrays(1, vao_.put()));
+        OGL_CALL(glCreateVertexArrays(1, vao_.put()));
 
         OGL_CALL(glCreateBuffers(1, v_buffer_.put()));
         OGL_CALL(glNamedBufferData(v_buffer_.get(), v_buffer_size, nullptr, v_buffer_hint));
@@ -22,10 +22,9 @@ namespace xe {
         OGL_CALL(glCreateBuffers(1, i_buffer_.put()));
         OGL_CALL(glNamedBufferData(i_buffer_.get(), i_buffer_size, nullptr, i_buffer_hint));
 
-        OGL_CALL(glBindVertexArray(vao_.get()));
-        OGL_CALL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, i_buffer_.get()));
-        OGL_CALL(glBindVertexArray(0u));
-        OGL_CALL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0u));
+        // All the attributes are read from the vertex buffer attached to the binding point 0.
+        OGL_CALL(glVertexArrayVertexBuffer(vao_.get(), 0, v_buffer_.get(), 0, stride_));
+        OGL_CALL(glVertexArrayElementBuffer(vao_.get(), i_buffer_.get()));
 
         switch (index_type_) {
             case GL_UNSIGNED_BYTE:
@@ -56,13 +55,10 @@ namespace xe {
 
 
     void Mesh::add_attribute(xe::AttributeType attr_type, GLuint size, GLenum type, GLsizei offset) const {
-        auto index = static_cast<int>(attr_type);
-        OGL_CALL(glBindVertexArray(vao_.get()));
-        OGL_CALL(glBindBuffer(GL_ARRAY_BUFFER, v_buffer_.get()));
-        OGL_CALL(glEnableVertexAttribArray(index));
-        OGL_CALL(glVertexAttribPointer(index, size, type, GL_FALSE, stride_, reinterpret_cast<void *>(offset)));
-        OGL_CALL(glBindBuffer(GL_ARRAY_BUFFER, 0u));
-        OGL_CALL(glBindVertexArray(0u));
+        auto index = static_cast<GLuint>(attr_type);
+        OGL_CALL(glEnableVertexArrayAttrib(vao_.get(), index));
+        OGL_CALL(glVertexArrayAttribFormat(vao_.get(), index, size, type, GL_FALSE, offset));
+        OGL_CALL(glVertexArrayAttribBinding(vao_.get(), index, 0));
     }
 
     void Mesh::draw() const {
