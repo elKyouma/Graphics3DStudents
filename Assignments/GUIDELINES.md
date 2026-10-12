@@ -12,6 +12,13 @@
    OGL_CALL(location = glGetUniformLocation(program, "map_Kd"));
    ```
 
-3. Commit your changes often. This will allow you to go back to a working version if you break something.
+3. Use the _direct state access_ (DSA) functions of OpenGL 4.5. Create objects with the `glCreate*` functions
+   (`glCreateBuffers`, `glCreateVertexArrays`, `glCreateTextures`) instead of `glGen*`, and modify them with the
+   functions that take the name of the object, such as `glNamedBufferData` or `glVertexArrayAttribFormat`, instead of
+   binding the object and then calling a function that modifies whatever is bound. Binding is still needed to _use_ an
+   object, e.g. `glBindVertexArray` before a draw call or `glBindTextureUnit` before sampling a texture. The first
+   assignments still set up the vertex array object by binding it; you will switch to DSA in
+   [`06_Pyramid`](06_Pyramid/README.md#direct-state-access-for-the-vertex-array).
+4. Commit your changes often. This will allow you to go back to a working version if you break something.
    Push them to your GitHub repository regularly, as this is where your assignments are checked.
-4. Do not leave commented out code in your programs.
+5. Do not leave commented out code in your programs.

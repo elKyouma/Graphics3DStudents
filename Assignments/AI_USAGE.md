@@ -22,9 +22,11 @@ Used well, an agent is a patient tutor that is available at any time. Below are 
    Rewrite it in your own way or ask the agent to explain it until you can.
 5. **Keep the steps small.** As in [GUIDELINES.md](GUIDELINES.md): one small change, build, run, commit. Do not let
    an agent rewrite many files at once — you will not know what changed or why.
-6. **Verify what it says.** Agents sound confident even when they are wrong. They often mix up OpenGL versions
-   (legacy `glBegin`/`glEnd`, `glGenBuffers` + `glBindBuffer` instead of the DSA functions used in this course), invent
-   functions or misremember matrix conventions. Check the documentation and run the code.
+6. **Verify what it says.** Agents sound confident even when they are wrong. They often mix up OpenGL versions, invent
+   functions or misremember matrix conventions. They may suggest legacy `glBegin`/`glEnd`, or the older bind-to-edit
+   style: `glGenBuffers`, `glBindBuffer` and `glBufferData` instead of `glCreateBuffers` and `glNamedBufferData`, or,
+   from the [`06_Pyramid`](06_Pyramid/README.md) assignment on, `glVertexAttribPointer` instead of
+   `glVertexArrayVertexBuffer` and `glVertexArrayAttribFormat`. Check the documentation and run the code.
 
 ## Don't
 
