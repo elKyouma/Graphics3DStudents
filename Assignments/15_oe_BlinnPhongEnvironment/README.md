@@ -85,8 +85,8 @@ normal mapped metal plate from the previous assignment, and `sphere_environment.
    ```
 
    of the fragment shader. In `bind` set `use_environment_map`, and when the map is present, set `view_to_world` and
-   bind the cube map to texture unit 5 with `glActiveTexture(GL_TEXTURE5)` and
-   `glBindTexture(GL_TEXTURE_CUBE_MAP, ...)`. Unbind it in `unbind`.
+   bind the cube map to texture unit 5 with `glBindTextureUnit(5, ...)`, like the other maps. It works for cube maps
+   too, because the target is taken from the texture itself. Unbind it in `unbind` with `glBindTextureUnit(5, 0)`.
 
    All sampler uniforms start at texture unit 0. A program in which samplers of _different types_, here `sampler2D` and
    `samplerCube`, that are used in the shader code refer to the same unit cannot be used for drawing at all: the draw
