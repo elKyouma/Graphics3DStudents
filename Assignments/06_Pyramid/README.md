@@ -46,8 +46,10 @@ bound. We will now do the same for the VAO. The result on the screen should not 
     - By default, attribute `i` reads from binding point `i`, so the color attribute has to be connected to binding
       point `0` explicitly.
 
-4. Remove the `glBindVertexArray`, `glBindBuffer` and `glVertexAttribPointer` calls from `init`. You still have to bind
-   the VAO in `frame` before the draw call.
+4. Remove the `glBindVertexArray`, `glBindBuffer`, `glEnableVertexAttribArray` and `glVertexAttribPointer` calls from
+   `init`. `glEnableVertexAttribArray` is replaced by `glEnableVertexArrayAttrib`; left in, it would act on whatever
+   vertex array object happens to be bound, or generate `GL_INVALID_OPERATION` if none is. You still have to bind the
+   VAO in `frame` before the draw call.
 
 ## Orientation and back-face culling
 
