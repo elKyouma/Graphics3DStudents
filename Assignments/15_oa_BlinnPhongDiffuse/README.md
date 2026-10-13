@@ -7,10 +7,13 @@ Start by copying the `13_OBJReader` assignment to a new `15_oa_BlinnPhongDiffuse
 
 ## Square
 
-1. It will be easier to debug the lighting if we have a simpler model. Based on the `pyramid.obj` and `pyramid.mtl`
-   create two new files `square.obj` and `square.mtl` in the `Models` directory that will define a square with `Kd`
-   coefficient set to _silver sand_ color (0.7490, 0.7569, 0.7601). Please disable the back-face culling, as the
-   square is not a closed object. The square should lie in the x-y plane, be centered at the origin and have size 2x2.
+1. It will be easier to debug the lighting if we have a simpler model. Using the `pyramid.obj` and `pyramid.mtl` files
+   as an example of the format, create two new files `square.obj` and `square.mtl` in the `Models` directory that will
+   define a square with `Kd` coefficient set to _silver sand_ color (0.7490, 0.7569, 0.7601) and `illum 0`. Unlike the
+   pyramid, the square should have only the vertex positions (`v` lines) and the faces given by the vertex indices
+   alone (`f 1 2 3`): no texture coordinates (`vt`) and no normal vectors (`vn`). We will add the normals later. The
+   square should lie in the x-y plane, be centered at the origin and have size 2x2, with its front face towards the
+   camera. Please disable the back-face culling, as the square is not a closed object.
 2. Set the camera in position (0, 0, 3) with fov 45 degrees and look down at the origin. Set the up vector to (0, 1, 0).
    You should see something like this:
    <p align="center"><img alt="square" src="square.png"></p>
@@ -71,11 +74,9 @@ Now we have a base to start implementing the diffuse lighting.
 As I hope you remember, for lighting we need to know normal vectors of the surface. In this case, it is particularly
 simple as a square is flat. The normal vector is the same for all vertices, and it is perpendicular to the surface.
 
-1. Add the normal vector in the `square.obj` file:
-   ```obj
-   vn 0.0 0.0 1.0
-   ```
-   and the index of this normal vector to every vertex in the face definitions:
+1. Add the normal vector in the `square.obj` file with a `vn` line. It must be a unit vector perpendicular to the
+   square, pointing away from its front face, i.e. towards the side from which the vertices of the triangles are seen
+   in counterclockwise order. Then add the index of this normal vector to every vertex in the face definitions:
    ```obj
    f 1//1 2//1 3//1
    ```
