@@ -37,7 +37,7 @@ code is described in [DEBUGGING.md](DEBUGGING.md).
 | `04_Uniforms` | [Uniforms](04_Uniforms/README.md) | Pass data to shaders in uniform interface blocks with `std140` layout: mix colors and move the house. |
 | `05_PVM` | [Projection - View - Model](05_PVM/README.md) | Transform vertices with the model, view and projection matrices. |
 | `06_Pyramid` | [Pyramid](06_Pyramid/README.md) | Set up the vertex array with direct state access, build a 3D pyramid and turn on the depth buffer and back-face culling. |
-| `07_Resize` | [Resize](07_Resize/README.md) | Update the viewport and the aspect ratio of the projection when the window is resized. |
+| `07_Resize` | [Resize](07_Resize/README.md) | Update the aspect ratio of the projection when the window is resized. |
 | `08_Zoom` | [Zoom](08_Zoom/README.md) | Move the camera into a `Camera` class and zoom with the mouse wheel by changing the field of view. |
 | `09_CameraMovement` | [Camera Movement](09_CameraMovement/README.md) | Rotate the camera around the scene center with the mouse, using a camera controller. |
 | `10_Mesh` | [Mesh](10_Mesh/README.md) | Move the camera classes into the engine and replace raw buffer calls with the `Mesh` class. |
