@@ -46,6 +46,11 @@ and 90.
    which is much brighter than the light reflected from the dark diffuse texture. It will go away when we add the
    ambient texture below.
 
+2. Lower the ambient light that the `frame` method loads into the lights buffer from (0.25, 0.25, 0.25) to
+   (0.1, 0.1, 0.1). With `Ka` white and the ambient texture added below, the ambient term is the ambient light times
+   the color of the plate, so with 0.25 the whole plate is noticeably brighter and the dim highlight stands out less.
+   The pictures in this and the next assignment were made with 0.1.
+
 ## Textures with any number of channels
 
 The specular texture `metal_plate_spec_1k.png` and the shininess texture `ns0001.png` are grayscale images with only
