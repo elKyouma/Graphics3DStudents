@@ -17,7 +17,9 @@
    functions that take the name of the object, such as `glNamedBufferData` or `glVertexArrayAttribFormat`, instead of
    binding the object and then calling a function that modifies whatever is bound. Binding is still needed to _use_ an
    object, e.g. `glBindVertexArray` before a draw call or `glBindTextureUnit` before sampling a texture. The first
-   assignments still set up the vertex array object by binding it; you will switch to DSA in
+   assignments, up to `05_PVM`, are an exception: the provided code creates the vertex array object with
+   `glGenVertexArrays` and sets it up by binding it, together with the vertex and index buffers. Keep it that way
+   there; you will switch the vertex array to DSA in
    [`06_Pyramid`](06_Pyramid/README.md#direct-state-access-for-the-vertex-array).
 4. Commit your changes often. This will allow you to go back to a working version if you break something.
    Push them to your GitHub repository regularly, as this is where your assignments are checked.
