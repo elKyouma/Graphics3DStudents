@@ -31,7 +31,8 @@ complete them based on the documentation. Usually, just search for the name of t
 to the [OpenGL® 4 Reference Pages](https://registry.khronos.org/OpenGL-Refpages/gl4/).
 
 Please follow the [guidelines](GUIDELINES.md) when working on the assignments. How to find and fix errors in your
-code is described in [DEBUGGING.md](DEBUGGING.md).
+code is described in [DEBUGGING.md](DEBUGGING.md). If you use AI coding agents (Claude Code, Codex, Copilot, ...),
+please read [AI_USAGE.md](AI_USAGE.md) first.
 
 ## List of assignments
 
