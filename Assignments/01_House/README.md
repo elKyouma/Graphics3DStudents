@@ -17,10 +17,12 @@
     ```
    in the `./build` directory. Or just use VS Code or your other favorite IDE.
 
-3. If everything goes all right, then after executing the program
+3. If everything goes all right, then after executing the program from the `./build` directory, where the previous
+   step left you,
     ```
-    ./build/src/Assignments/01_House/01_House
+    ./src/Assignments/01_House/01_House
     ```
+   (or `./build/src/Assignments/01_House/01_House` from the main directory of the repository)
    you should again see the red triangle.
    You are now ready to play with the code.
    Please note that when using CLion, the executable is located in the `./cmake-build-debug/src/Assignments/01_House/`

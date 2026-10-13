@@ -189,8 +189,10 @@ uniform sampler2D map_Kd;
    pyramid->add_submesh(0, indices.size(), new xe::KdMaterial({1.f, 1.f, 1.0f, 1.0f}, false, tex_handle));
    ```
    The material does not take ownership of the texture, it only uses its handle, so the application has to delete
-   it. Keep the handle in a field `GLuint texture_ = 0u;` of `SimpleShapeApplication` and override the `cleanup`
-   method, which is called before the window and its OpenGL context are destroyed:
+   it. Keep the handle in a field `GLuint texture_ = 0u;` of `SimpleShapeApplication`, i.e. assign
+   `texture_ = tex_handle;` in `init`; otherwise `cleanup` deletes texture zero and the real texture is never deleted.
+   Then declare `void cleanup() override;` in `app.h` and define the `cleanup` method, which is called before the
+   window and its OpenGL context are destroyed:
    ```c++
    void SimpleShapeApplication::cleanup() {
        OGL_CALL(glDeleteTextures(1, &texture_));

@@ -113,7 +113,10 @@ needed for the depth test while drawing the scene, but never read afterwards, so
    }
    ```
 
-3. Call `create_framebuffer` in `init` with the size returned by `frame_buffer_size()`.
+3. Call `create_framebuffer` in `init` with the size returned by `frame_buffer_size()`. The `init` method already has
+   the line `auto [w, h] = frame_buffer_size();`, used to set up the camera. Move it to the beginning of `init` and
+   pass `w` and `h` to `create_framebuffer`. Do not write a second `auto [w, h] = ...` in the same function: this
+   declares `w` and `h` again and does not compile.
 
 ### Why an sRGB texture?
 

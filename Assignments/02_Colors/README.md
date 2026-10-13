@@ -23,7 +23,11 @@
    This should not change anything on the screen.
 
 5. In the `app.cpp` file add appropriate `glVertexAttribPointer` and `glEnableVertexAttribArray` that will enable
-   color to be read from the vertex buffer. Everything should still be working fine. Please take care when copying and
+   color to be read from the vertex buffer. Put them next to the existing calls for the position attribute, before
+   `glBindBuffer(GL_ARRAY_BUFFER, 0)`: `glVertexAttribPointer` reads from the buffer that is bound to
+   `GL_ARRAY_BUFFER` at the moment it is called. With no buffer bound and a non-zero offset, as for the colors, it
+   generates `GL_INVALID_OPERATION`.
+   Everything should still be working fine. Please take care when copying and
    pasting to appropriately change or remove the comments. Comments should always reflect the actual code. I suggest
    removing my comments as you are progressing with the assignments.
 
