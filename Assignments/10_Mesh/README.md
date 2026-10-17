@@ -57,8 +57,11 @@ Submeshes are added to mesh using the `add_submesh` method.
 Mesh class also assumes using a predefined set of vertex attributes that are specified by the `xe::AttributeType` enum.
 The values of the enum correspond to the location value of the corresponding attribute in vertex shader.
 Adding the attribute to the mesh is done using the `add_attribute` method.
-This method is similar to the `glVertexAttribPointer` function, but it does not require the `stride` argument as it is
-already provided in the constructor (see description below), and uses the `AttributeType` enum instead of the attribute index.
+This method makes the same three calls you wrote for each attribute in the
+[`06_Pyramid`](../06_Pyramid/README.md#direct-state-access-for-the-vertex-array) assignment: `glEnableVertexArrayAttrib`,
+`glVertexArrayAttribFormat` and `glVertexArrayAttribBinding`. It uses the `AttributeType` enum instead of the attribute
+index, and it does not require the `stride` argument: the constructor (see description below) attaches the vertex
+buffer with the given stride to the binding point `0`, and all the attributes are read from it.
 
 1. We will store the meshes in the vector of meshes in the `SimpleShapeApplication` class, so please include the `Engine/Mesh.h` header in `app.h` and add the field
    ```c++
@@ -71,8 +74,9 @@ already provided in the constructor (see description below), and uses the `Attri
        meshes_.push_back(mesh);
    }
    ```
-2. In the vertex shader change the location of the `a_vertex_color` to five (5). Change the corresponding parameter in
-   the calls to `glVertexAttribPointer` and `glEnableVertexAttribArray`.
+2. In the vertex shader change the location of the `a_vertex_color` to five (5). Change the corresponding attribute
+   index in the calls to `glEnableVertexArrayAttrib`, `glVertexArrayAttribFormat` and `glVertexArrayAttribBinding` (but
+   not the binding point, which stays `0`). Check that the pyramid still has its colors before going further.
 
 3. Next we have to create the mesh for our pyramid in the `init` method. So start with creating a new `Mesh`
    ```c++
@@ -121,4 +125,5 @@ already provided in the constructor (see description below), and uses the `Attri
    ```
    Remove the bind and unbind `vao_` calls from this method.
 
-8. Please delete all unnecessary code from the `init` method.
+8. Please delete all unnecessary code: the creation of the vertex and index buffers and of the vertex array object in
+   the `init` method, and the `vao_` field.

@@ -3,18 +3,25 @@
 This folder contains the descriptions of assignments to be performed during this course. Assignments are _incremental_.
 Each new assignment will be based on the previous ones. For this purpose, you will copy assignments to new folders. How
 to do this is described in the [Preparing the assignments](#preparing-the-assignments) section below. Each assignment
-will be scored. The number of points assigned to each assignment will appear in the Teams
-spreadsheet [zadania](https://ujchmura.sharepoint.com/:x:/r/teams/Section_628677_1/Shared%20Documents/General/zadania.xlsx?d=w8aa96ddd9bad4e4bb8f0b9e1cb6ac4f0&csf=1&web=1&e=0I5BJW)
-located in the general channel of the
-[course team](https://teams.microsoft.com/l/team/19%3A-rUP1GUAhYdDATjI1djR2MqYPLl8j9igT6vpYDIsdCw1%40thread.tacv2/conversations?groupId=7f734604-dc54-4ac6-9714-3ce4f58e01ba&tenantId=eb0e26eb-bfbe-47d2-9e90-ebd2426dbceb) on Microsoft Teams.
+will be scored; the points are given in the [list of assignments](#list-of-assignments) below.
 
-As I am still working on the assignments, not all of them have points assigned yet; I hope to finish this by
-18 October 2026. The final grade will be calculated based on the total number of points. However, to pass you have to
-reach at least the [`Diffuse`](15_oa_BlinnPhongDiffuse/README.md) assignment (`15_oa_BlinnPhongDiffuse`) and get at
-least 50% of the points. The exact scale is not yet set, as it may depend slightly upon your performance; more details
-will be given together with the points.
+The regular assignments are worth 167 points in total. `12_ob_ComputeShader` (10 points) and `12_oc_PostProcessing`
+(22 points) are _bonus_ assignments: you do not have to do them, but their points are added to your total. The final
+grade is calculated from the total number of points. To pass you have to hand in at least the
+[`Diffuse`](15_oa_BlinnPhongDiffuse/README.md) assignment (`15_oa_BlinnPhongDiffuse`) and get at least 100 points. The
+grade scale is:
 
-Assignments will have a due date, after which they will no longer be accepted.
+| Grade | Minimum points |
+|---|---:|
+| 3 | 100 |
+| 3.5 | 114 |
+| 4 | 128 |
+| 4.5 | 142 |
+| 5 | 156 |
+
+Assignments will have a due date. An assignment handed in after its due date gets fewer points: each week of delay
+takes away 25% of its points. For example, the 15 points of `09_CameraMovement` become 11.25 when it is handed in up to
+one week late, 7.5 up to two weeks late, and so on; after four weeks it is worth no points.
 You can submit subsequent assignments, but all prior assignments must be included in them.
 As you have to do all the assignments up to `Diffuse` anyway, you may as well try to submit them on time. The
 due dates will be given in the Teams spreadsheet [zadania](https://ujchmura.sharepoint.com/:x:/r/teams/Section_628677_1/Shared%20Documents/General/zadania.xlsx?d=w8aa96ddd9bad4e4bb8f0b9e1cb6ac4f0&csf=1&web=1&e=0I5BJW) in the [course team](https://teams.microsoft.com/l/team/19%3A-rUP1GUAhYdDATjI1djR2MqYPLl8j9igT6vpYDIsdCw1%40thread.tacv2/conversations?groupId=7f734604-dc54-4ac6-9714-3ce4f58e01ba&tenantId=eb0e26eb-bfbe-47d2-9e90-ebd2426dbceb) by 18 October 2026.
@@ -24,33 +31,33 @@ complete them based on the documentation. Usually, just search for the name of t
 to the [OpenGL® 4 Reference Pages](https://registry.khronos.org/OpenGL-Refpages/gl4/).
 
 Please follow the [guidelines](GUIDELINES.md) when working on the assignments. How to find and fix errors in your
-code is described in [DEBUGGING.md](DEBUGGING.md).
+code is described in [DEBUGGING.md](DEBUGGING.md). If you use AI coding agents (Claude Code, Codex, Copilot, ...),
+please read [AI_USAGE.md](AI_USAGE.md) first.
 
 ## List of assignments
 
-| Folder | Assignment | Description |
-|---|---|---|
-| `00_Triangle` | [Triangle](00_Triangle/README.md) | Starting point (not graded): a red triangle on a gray background. |
-| `01_House` | [House](01_House/README.md) | Experiment with the vertex data and shaders, then draw a house from three triangles. |
-| `02_Colors` | [Colors](02_Colors/README.md) | Add a per-vertex color attribute to the vertex buffer and pass it through the shaders. |
-| `03_Indices` | [Indices](03_Indices/README.md) | Use an index buffer to remove repeated vertices. |
-| `04_Uniforms` | [Uniforms](04_Uniforms/README.md) | Pass data to shaders in uniform interface blocks with `std140` layout: mix colors and move the house. |
-| `05_PVM` | [Projection - View - Model](05_PVM/README.md) | Transform vertices with the model, view and projection matrices. |
-| `06_Pyramid` | [Pyramid](06_Pyramid/README.md) | Build a 3D pyramid and turn on the depth buffer and back-face culling. |
-| `07_Resize` | [Resize](07_Resize/README.md) | Update the viewport and the aspect ratio of the projection when the window is resized. |
-| `08_Zoom` | [Zoom](08_Zoom/README.md) | Move the camera into a `Camera` class and zoom with the mouse wheel by changing the field of view. |
-| `09_CameraMovement` | [Camera Movement](09_CameraMovement/README.md) | Rotate the camera around the scene center with the mouse, using a camera controller. |
-| `10_Mesh` | [Mesh](10_Mesh/README.md) | Move the camera classes into the engine and replace raw buffer calls with the `Mesh` class. |
-| `11_KdMaterial` | [KdMaterial](11_KdMaterial/README.md) | Add materials: a `KdMaterial` class that sets the diffuse color of submeshes. |
-| `12_oa_Textures` | [Textures](12_oa_Textures/README.md) | Take the diffuse color from a texture using UV coordinates, and apply gamma correction. |
-| `12_ob_ComputeShader` | [Processing textures with a compute shader](12_ob_ComputeShader/README.md) | Process a texture on the GPU with a compute shader: grayscale and negative. |
-| `12_oc_PostProcessing` | [Post-processing](12_oc_PostProcessing/README.md) | Render into a texture with a framebuffer object, then post-process it: color blindness simulation and Sobel edge detection. |
-| `13_OBJReader` | [Reading Wavefront OBJ files](13_OBJReader/README.md) | Load models and materials from OBJ/MTL files, with RAII ownership of OpenGL objects. |
-| `15_oa_BlinnPhongDiffuse` | [Diffuse lighting](15_oa_BlinnPhongDiffuse/README.md) | Light the scene with the ambient and diffuse terms of the Blinn-Phong model and point lights. |
-| `15_ob_BlinnPhongSpecular` | [Specular](15_ob_BlinnPhongSpecular/README.md) | Add the specular term of the Blinn-Phong model using the half-vector. |
-| `15_oc_BlinnPhongTextures` | [Blinn-Phong textures](15_oc_BlinnPhongTextures/README.md) | Read the `Ka`, `Ks` and `Ns` material parameters from textures. |
-| `15_od_BlinnPhongNormalMap` | [Normal maps](15_od_BlinnPhongNormalMap/README.md) | Add surface detail with a normal map in tangent space. |
-| `15_oe_BlinnPhongEnvironment` | [Environment maps](15_oe_BlinnPhongEnvironment/README.md) | Add reflections from a cube-map environment and draw it as a skybox. |
+| Folder | Assignment | Description | Points |
+|---|---|---|---:|
+| `00_Triangle` | [Triangle](00_Triangle/README.md) | Starting point (not graded): a red triangle on a gray background. | — |
+| `01_House` | [House](01_House/README.md) | Experiment with the vertex data and shaders, then draw a house from three triangles. | 2 |
+| `02_Colors` | [Colors](02_Colors/README.md) | Add a per-vertex color attribute to the vertex buffer and pass it through the shaders. | 4 |
+| `03_Indices` | [Indices](03_Indices/README.md) | Use an index buffer to remove repeated vertices. | 4 |
+| `04_Uniforms` | [Uniforms](04_Uniforms/README.md) | Pass data to shaders in uniform interface blocks with `std140` layout: mix colors and move the house. | 8 |
+| `05_PVM` | [Projection - View - Model](05_PVM/README.md) | Transform vertices with the model, view and projection matrices. | 5 |
+| `06_Pyramid` | [Pyramid](06_Pyramid/README.md) | Set up the vertex array with direct state access, build a 3D pyramid and turn on the depth buffer and back-face culling. | 6 |
+| `07_Resize` | [Resize](07_Resize/README.md) | Update the aspect ratio of the projection when the window is resized. | 6 |
+| `08_Zoom` | [Zoom](08_Zoom/README.md) | Move the camera into a `Camera` class and zoom with the mouse wheel by changing the field of view. | 10 |
+| `09_CameraMovement` | [Camera Movement](09_CameraMovement/README.md) | Rotate the camera around the scene center with the mouse, using a camera controller. | 15 |
+| `10_Mesh` | [Mesh](10_Mesh/README.md) | Move the camera classes into the engine and replace raw buffer calls with the `Mesh` class. | 12 |
+| `11_KdMaterial` | [KdMaterial](11_KdMaterial/README.md) | Add materials: a `KdMaterial` class that sets the diffuse color of submeshes. | 15 |
+| `12_oa_Textures` | [Textures](12_oa_Textures/README.md) | Take the diffuse color from a texture using UV coordinates, and apply gamma correction. | 15 |
+| `12_ob_ComputeShader` | [Processing textures with a compute shader](12_ob_ComputeShader/README.md) | Process a texture on the GPU with a compute shader: grayscale and negative. | 10 (bonus) |
+| `12_oc_PostProcessing` | [Post-processing](12_oc_PostProcessing/README.md) | Render into a texture with a framebuffer object, then post-process it: color blindness simulation and Sobel edge detection. | 22 (bonus) |
+| `13_OBJReader` | [Reading Wavefront OBJ files](13_OBJReader/README.md) | Load models and materials from OBJ/MTL files, with RAII ownership of OpenGL objects. | 13 |
+| `15_oa_BlinnPhongDiffuse` | [Diffuse lighting](15_oa_BlinnPhongDiffuse/README.md) | Light the scene with the ambient and diffuse terms of the Blinn-Phong model and point lights. | 25 |
+| `15_ob_BlinnPhongSpecular` | [Specular](15_ob_BlinnPhongSpecular/README.md) | Add the specular term of the Blinn-Phong model using the half-vector. | 7 |
+| `15_oc_BlinnPhongTextures` | [Blinn-Phong textures](15_oc_BlinnPhongTextures/README.md) | Read the `Ka`, `Ks` and `Ns` material parameters from textures. | 10 |
+| `15_od_BlinnPhongNormalMap` | [Normal maps](15_od_BlinnPhongNormalMap/README.md) | Add surface detail with a normal map in tangent space. | 10 |
 
 `12_ob_ComputeShader` and `12_oc_PostProcessing` form a side branch: `12_ob_ComputeShader` starts from
 `12_oa_Textures`, and `12_oc_PostProcessing` from `12_ob_ComputeShader`, but the main line continues with

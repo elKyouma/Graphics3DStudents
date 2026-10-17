@@ -129,8 +129,8 @@ images with four channels), and sRGB formats cannot be used for writing from sha
       (respectively `height`) divided by 16 and rounded __up__,
     - unbind the texture and the image and set the current program to zero.
 
-   As we will not use the compute program anymore, delete it with `glDeleteProgram`. The original texture is not
-   needed anymore either, only the processed one, so delete it with `glDeleteTextures`.
+   As we will not use the compute program anymore, delete it with `glDeleteProgram`. Do not delete the original
+   texture yet: the material still uses it until step 3.
 
 2. Commands issued to OpenGL are executed in order, but the writes done by shaders to images are an exception: OpenGL
    does not guarantee that they are visible to the commands issued later. We have to request this explicitly with a
@@ -142,7 +142,8 @@ images with four channels), and sRGB formats cannot be used for writing from sha
    such errors hard to find.
 
 3. Finally, pass `processed_tex_handle` instead of `tex_handle` to the `KdMaterial` constructor, and store it in the
-   `texture_` field, so that `cleanup` deletes it instead of the original texture. You should see the
+   `texture_` field, so that `cleanup` deletes it instead of the original texture. The original texture is not
+   needed anymore, so now delete it with `glDeleteTextures`. You should see the
    same pyramid as at the end of the previous assignment. If it is black, check that every OpenGL call is wrapped in
    `OGL_CALL`, that the formats in the shader, `glTextureStorage2D` and `glBindImageTexture` agree, and that the units
    passed to `glBindTextureUnit` and `glBindImageTexture` are the same as the `binding` values in the shader. OpenGL

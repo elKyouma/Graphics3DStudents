@@ -73,15 +73,14 @@ To use it please include the `stb/stb_image.h` header file. The image can then b
    OGL_CALL(glTextureSubImage2D(tex_handle, 0, 0, 0, width, height, format, GL_UNSIGNED_BYTE, img));
    ```
    These are the _direct state access_ (DSA) functions that take the texture handle as an argument, just as
-   `glCreateBuffers` and `glNamedBufferData` do for buffers. OpenGL has two styles of creating and modifying objects.
-   In the older _bind-to-edit_ style (`glGenTextures`, `glBindTexture`, `glTexImage2D`, `glTexParameteri`), which you
-   will find in many tutorials and which we use for the vertex array objects, an object is first bound to a _target_
-   such as `GL_TEXTURE_2D`, and the following functions modify whatever object is currently bound to that target. This
-   makes it easy to change the wrong object by mistake, e.g. one that some other code left bound. The DSA functions,
-   available since OpenGL 4.5, name the object explicitly and do not depend on, or change, what is bound. Both styles
-   create the same objects, so they can be mixed freely, which is why you will see both in this course. For new code
-   we prefer DSA: binding is then needed only where an object is actually used, e.g. a texture bound to a texture unit
-   for drawing.
+   `glCreateBuffers` and `glNamedBufferData` do for buffers and `glVertexArrayAttribFormat` does for the vertex array
+   object since [`06_Pyramid`](../06_Pyramid/README.md#direct-state-access-for-the-vertex-array). Many tutorials use
+   the older _bind-to-edit_ style instead: `glGenTextures`, then `glBindTexture` to bind the texture to the
+   `GL_TEXTURE_2D` _target_, then `glTexImage2D` and `glTexParameteri`, which modify whatever texture is currently bound
+   to that target. This makes it easy to change the wrong texture by mistake, e.g. one that some other code left bound.
+   Both styles create the same objects, so code from such tutorials can be translated, but in this course we use DSA
+   (see the [guidelines](../GUIDELINES.md)): binding is needed only where a texture is actually used, i.e. bound to a
+   texture unit for drawing.
 
    The `glTextureStorage2D` function allocates _immutable_ storage: the size and format of the texture cannot be
    changed later (its contents can). Its second argument is the number of mipmap levels; we do not use mipmaps, so it
@@ -190,8 +189,10 @@ uniform sampler2D map_Kd;
    pyramid->add_submesh(0, indices.size(), new xe::KdMaterial({1.f, 1.f, 1.0f, 1.0f}, false, tex_handle));
    ```
    The material does not take ownership of the texture, it only uses its handle, so the application has to delete
-   it. Keep the handle in a field `GLuint texture_ = 0u;` of `SimpleShapeApplication` and override the `cleanup`
-   method, which is called before the window and its OpenGL context are destroyed:
+   it. Keep the handle in a field `GLuint texture_ = 0u;` of `SimpleShapeApplication`, i.e. assign
+   `texture_ = tex_handle;` in `init`; otherwise `cleanup` deletes texture zero and the real texture is never deleted.
+   Then declare `void cleanup() override;` in `app.h` and define the `cleanup` method, which is called before the
+   window and its OpenGL context are destroyed:
    ```c++
    void SimpleShapeApplication::cleanup() {
        OGL_CALL(glDeleteTextures(1, &texture_));

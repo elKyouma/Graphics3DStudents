@@ -129,12 +129,16 @@ when the context no longer exists, so do not store a `gl::` handle in one.
    callers can check for it with `if (texture)` (see the `create_from_mtl` code in the next section).
 
 5. In the `app.cpp` file, use this newly defined function to load the texture. The `KdMaterial` constructor takes a
-   plain `GLuint`, so pass it `texture.get()`; the material only uses the texture, it does not own it. The texture
-   must therefore be owned by something that lives as long as the material: change the type of the `texture_` field
-   of `SimpleShapeApplication` from `GLuint` to `xe::gl::Texture`, and remove the `glDeleteTextures` call from
-   `cleanup`, as the handle now deletes the texture itself. If you kept it in a local variable of `init`, it would be
-   deleted at the end of `init`, and the material would bind a deleted texture: `glBindTextureUnit` would report
-   `GL_INVALID_OPERATION`, or, if the name was reused by a texture created later, the pyramid would show that texture.
+   plain `GLuint`, which the `get()` method of the handle returns; the material only uses the texture, it does not own
+   it. The texture must therefore be owned by something that lives as long as the material: change the declaration of
+   the `texture_` field of `SimpleShapeApplication` from `GLuint texture_ = 0u;` to `xe::gl::Texture texture_;`. Drop
+   the `= 0u` initializer: the constructor of the handle taking a `GLuint` is `explicit`, so `= 0u` does not compile,
+   and a default-constructed handle is already empty. Store the loaded texture in it with
+   `texture_ = xe::create_texture(...);` and pass `texture_.get()` to the material. Remove the `glDeleteTextures`
+   call from `cleanup`, as the handle now deletes the texture itself. If you kept it in a local variable of `init`, it
+   would be deleted at the end of `init`, and the material would bind a deleted texture: `glBindTextureUnit` would
+   report `GL_INVALID_OPERATION`, or, if the name was reused by a texture created later, the pyramid would show that
+   texture.
 
 ## Materials from MTL files
 

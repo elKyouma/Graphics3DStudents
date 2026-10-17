@@ -7,12 +7,13 @@ Start by copying the `13_OBJReader` assignment to a new `15_oa_BlinnPhongDiffuse
 
 ## Square
 
-1. It will be easier to debug the lighting if we have a simpler model. Based on the `pyramid.obj` and `pyramid.mtl`
-   create two new files `square.obj` and `square.mtl` that will define a square with `Kd` coefficient set to
-   _silver sand_ color (0.7490, 0.7569, 0.7601). Please disable the back-face culling, as the square is not a closed
-   object. The square should lie in the x-y plane, be centered at the origin and have size 2x2. (The `Models`
-   directory already contains these two files in the form they will have at the end of this assignment; you can
-   compare yours with them, or write yours under different names.)
+1. It will be easier to debug the lighting if we have a simpler model. Using the `pyramid.obj` and `pyramid.mtl` files
+   as an example of the format, create two new files `square.obj` and `square.mtl` in the `Models` directory that will
+   define a square with `Kd` coefficient set to _silver sand_ color (0.7490, 0.7569, 0.7601) and `illum 0`. Unlike the
+   pyramid, the square should have only the vertex positions (`v` lines) and the faces given by the vertex indices
+   alone (`f 1 2 3`): no texture coordinates (`vt`) and no normal vectors (`vn`). We will add the normals later. The
+   square should lie in the x-y plane, be centered at the origin and have size 2x2, with its front face towards the
+   camera. Please disable the back-face culling, as the square is not a closed object.
 2. Set the camera in position (0, 0, 3) with fov 45 degrees and look down at the origin. Set the up vector to (0, 1, 0).
    You should see something like this:
    <p align="center"><img alt="square" src="square.png"></p>
@@ -41,8 +42,7 @@ In this assignment we will only use the first two terms of the equation, the amb
    Everything should look as previously, but a warning is printed that the material needs normals and that
    `KdMaterial` is used instead. Lighting needs normal vectors, and your `square.obj` does not have them yet, so the OBJ
    loader falls back to `KdMaterial` (see `Engine/mesh_loader.cpp`). The square will be drawn with the
-   `BlinnPhongMaterial` once we add the normals in the [Normal vectors](#normal-vectors) section. (If you use the
-   `square.obj` file from the `Models` directory, it already has the normals, and there is no warning.)
+   `BlinnPhongMaterial` once we add the normals in the [Normal vectors](#normal-vectors) section.
 
 2. Copy the `Kd_vs.glsl` and `Kd_fs.glsl` shader files to `BlinnPhong_vs.glsl` and `BlinnPhong_fs.glsl` respectively. In
    the `BlinnPhongMaterial::init` method change the shader names to the new ones. In the `BlinnPhong_fs.glsl` file
@@ -74,11 +74,9 @@ Now we have a base to start implementing the diffuse lighting.
 As I hope you remember, for lighting we need to know normal vectors of the surface. In this case, it is particularly
 simple as a square is flat. The normal vector is the same for all vertices, and it is perpendicular to the surface.
 
-1. Add the normal vector in the `square.obj` file:
-   ```obj
-   vn 0.0 0.0 1.0
-   ```
-   and the index of this normal vector to every vertex in the face definitions:
+1. Add the normal vector in the `square.obj` file with a `vn` line. It must be a unit vector perpendicular to the
+   square, pointing away from its front face, i.e. towards the side from which the vertices of the triangles are seen
+   in counterclockwise order. Then add the index of this normal vector to every vertex in the face definitions:
    ```obj
    f 1//1 2//1 3//1
    ```

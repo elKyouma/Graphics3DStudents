@@ -9,7 +9,7 @@ To remedy this, you can use an index buffer.
 The idea is to load only non-repeating vertices into the vertex buffer.
 Then, to define triangles, we use the _indices_ of the vertices that we pass in the index buffer. So instead of
 repeating the same vertex several times, we use the same vertex index several times. As an index is an integer, we
-save a lot of memory compared to vertex data that consists in our case of six floats.
+save a lot of memory compared to repeating the vertex data, which in our case is six floats per vertex.
 Please remember that two vertices are considered the same if they have the same coordinates and the same attributes,
 so if they differ in color, they are considered different even if they have the same coordinates.
 
@@ -39,4 +39,7 @@ Start by copying the `02_Colors` assignment to a new `03_Indices` directory, as 
 
 1. If our house is displayed, please remove the repeated vertices from the vertex buffer and modify the index buffer
    accordingly so that the __same__ house still appears on the screen. You should end up with seven vertices in the vertex
-   buffer.
+   buffer. This is the final version that you should submit to your repository. It should look exactly like the
+   result of the previous assignment:
+
+   ![colors](../02_Colors/colors.png)
