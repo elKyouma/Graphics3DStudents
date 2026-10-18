@@ -108,7 +108,7 @@ void SimpleShapeApplication::frame() {
     auto R = glm::mat3(VM);
     auto VM_normal = glm::mat3(glm::cross(R[1], R[2]), glm::cross(R[2], R[0]), glm::cross(R[0], R[1]));
 
-    glm::vec3 ambient = {0.25, 0.25, 0.25};
+    glm::vec3 ambient = {0.1, 0.1, 0.1};
 
     OGL_CALL(glNamedBufferSubData(u_trans_buffer_.get(), 0, 16 * sizeof(float), &PVM));
     OGL_CALL(glNamedBufferSubData(u_trans_buffer_.get(), 16 * sizeof(float), 16 * sizeof(float), &VM));

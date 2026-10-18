@@ -27,12 +27,16 @@ public:
 	static Material* create_from_mtl(const mtl_material_t& mat, std::string mtl_dir)
 	{
         glm::vec4 color = get_color(mat.diffuse);
-        color = glm::vec4(xe::srgb_inverse_gamma_correction(glm::vec3(color)), color.a);
+
+		const auto invertGammaForVec4 = [](const glm::vec4& c) {
+			return glm::vec4(xe::srgb_inverse_gamma_correction(glm::vec3(c)), c.a);
+			};
+        color = invertGammaForVec4(color);
         SPDLOG_INFO("Adding BlinnPhongMaterial {}", glm::to_string(color));
         auto material = new xe::BlinnPhongMaterial(color);
 		material->Kd_ = color;
-		material->Ka_ = get_color(mat.ambient);
-		material->Ks_ = get_color(mat.specular);
+		material->Ka_ = invertGammaForVec4(get_color(mat.ambient));
+		material->Ks_ = invertGammaForVec4(get_color(mat.specular));
 		material->Ns_ = mat.shininess;
 		material->illum_ = mat.illum;
         if (!mat.diffuse_texname.empty()) {
@@ -67,6 +71,14 @@ public:
                 material->owned_textures_.push_back(std::move(texture));
             }
         }
+		if (!mat.bump_texname.empty()) {
+			auto texture = xe::create_texture(mtl_dir + "/" + mat.bump_texname, false, 3);
+			SPDLOG_INFO("Adding Texture {} {:1d}", mat.bump_texname, texture.get());
+			if (texture) {
+				material->set_map_bump(texture.get());
+				material->owned_textures_.push_back(std::move(texture));
+			}
+		}
         return material;
 	}
 
@@ -86,6 +98,10 @@ public:
         texture_Ns_ = texture;
     }
 
+	void set_map_bump(GLuint texture) {
+		texture_bump_ = texture;
+	}
+
     static void init()
     {
         create_program_in_engine({ 
@@ -97,6 +113,26 @@ public:
         OGL_CALL(map_Kd_location_ = glGetUniformLocation(program(), "map_Kd"));
         if (map_Kd_location_ == -1) {
             SPDLOG_WARN("Cannot find map_Kd uniform");
+        }
+
+        OGL_CALL(map_Ka_location_ = glGetUniformLocation(program(), "map_Ka"));
+        if (map_Ka_location_ == -1) {
+            SPDLOG_WARN("Cannot find map_Ka uniform");
+        }
+
+        OGL_CALL(map_Ks_location_ = glGetUniformLocation(program(), "map_Ks"));
+        if (map_Ks_location_ == -1) {
+            SPDLOG_WARN("Cannot find map_Ks uniform");
+        }
+
+        OGL_CALL(map_Ns_location_ = glGetUniformLocation(program(), "map_Ns"));
+        if (map_Ns_location_ == -1) {
+            SPDLOG_WARN("Cannot find map_Ns uniform");
+        }
+        
+        OGL_CALL(map_bump_location_ = glGetUniformLocation(program(), "map_bump"));
+        if (map_bump_location_ == -1) {
+            SPDLOG_WARN("Cannot find map_bump uniform");
         }
 
         xe::add_mat_function("BlinnPhongMaterial", BlinnPhongMaterial::create_from_mtl);
@@ -116,30 +152,42 @@ public:
         int use_texture_Ka = texture_Ka_ != 0;
         int use_texture_Ks = texture_Ks_ != 0;
         int use_texture_Ns = texture_Ns_ != 0;
+		int use_texture_bump = texture_bump_ != 0;
         OGL_CALL(glNamedBufferSubData(material_uniform_buffer(), 3 * sizeof(glm::vec4) + sizeof(float) + sizeof(int), sizeof(int), &use_texture_Kd));
         OGL_CALL(glNamedBufferSubData(material_uniform_buffer(), 3 * sizeof(glm::vec4) + sizeof(float) + 2 * sizeof(int), sizeof(int), &use_texture_Ka));
         OGL_CALL(glNamedBufferSubData(material_uniform_buffer(), 3 * sizeof(glm::vec4) + sizeof(float) + 3 * sizeof(int), sizeof(int), &use_texture_Ks));
         OGL_CALL(glNamedBufferSubData(material_uniform_buffer(), 3 * sizeof(glm::vec4) + sizeof(float) + 4 * sizeof(int), sizeof(int), &use_texture_Ns));
-        OGL_CALL(glNamedBufferSubData(material_uniform_buffer(), 3 * sizeof(glm::vec4) + sizeof(float) + 5 * sizeof(int), sizeof(int), &illum_));
+        OGL_CALL(glNamedBufferSubData(material_uniform_buffer(), 3 * sizeof(glm::vec4) + sizeof(float) + 5 * sizeof(int), sizeof(int), &use_texture_bump));
+        OGL_CALL(glNamedBufferSubData(material_uniform_buffer(), 3 * sizeof(glm::vec4) + sizeof(float) + 6 * sizeof(int), sizeof(int), &illum_));
         if (texture_Kd_)
         {
             OGL_CALL(glUniform1i(map_Kd_location_, 0));
+			OGL_CALL(glActiveTexture(GL_TEXTURE0));
             OGL_CALL(glBindTexture(GL_TEXTURE_2D, texture_Kd_));
         }
         if (texture_Ka_)
         {
-            OGL_CALL(glUniform1i(map_Ka_location_, 0));
+            OGL_CALL(glUniform1i(map_Ka_location_, 1));
+			OGL_CALL(glActiveTexture(GL_TEXTURE1));
             OGL_CALL(glBindTexture(GL_TEXTURE_2D, texture_Ka_));
         }
         if (texture_Ks_)
         {
-            OGL_CALL(glUniform1i(map_Ks_location_, 0));
+            OGL_CALL(glUniform1i(map_Ks_location_, 2));
+			OGL_CALL(glActiveTexture(GL_TEXTURE2));
             OGL_CALL(glBindTexture(GL_TEXTURE_2D, texture_Ks_));
         }
         if (texture_Ns_)
         {
-            OGL_CALL(glUniform1i(map_Ns_location_, 0));
+            OGL_CALL(glUniform1i(map_Ns_location_, 3));
+			OGL_CALL(glActiveTexture(GL_TEXTURE3));
             OGL_CALL(glBindTexture(GL_TEXTURE_2D, texture_Ns_));
+        }
+        if (texture_bump_)
+        {
+            OGL_CALL(glUniform1i(map_bump_location_, 4));
+			OGL_CALL(glActiveTexture(GL_TEXTURE4));
+            OGL_CALL(glBindTexture(GL_TEXTURE_2D, texture_bump_));
         }
     }
 
@@ -166,13 +214,19 @@ public:
             OGL_CALL(glUniform1i(map_Ns_location_, 0));
             OGL_CALL(glBindTexture(GL_TEXTURE_2D, 0));
         }
+		if (texture_bump_)
+		{
+			OGL_CALL(glUniform1i(map_bump_location_, 0));
+			OGL_CALL(glBindTexture(GL_TEXTURE_2D, 0));
+		}
     }
 
 private:
     inline static GLint map_Kd_location_ = -1;
-    inline static GLint map_Ka_location_ = -1;
     inline static GLint map_Ks_location_ = -1;
+    inline static GLint map_Ka_location_ = -1;
     inline static GLint map_Ns_location_ = -1;
+    inline static GLint map_bump_location_ = -1;
     int use_vertex_colors_;
     glm::vec4 Kd_, Ka_, Ks_;
     float Ns_;
@@ -181,6 +235,7 @@ private:
     GLuint texture_Ka_ = 0;
     GLuint texture_Ks_ = 0;
     GLuint texture_Ns_ = 0;
+    GLuint texture_bump_ = 0;
     std::vector<gl::Texture> owned_textures_;
 };
 }

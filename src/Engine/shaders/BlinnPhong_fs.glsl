@@ -4,6 +4,7 @@ layout(location=0) in vec4 v_Color;
 layout(location=1) in vec2 v_TexCoord;
 layout(location=2) in vec3 v_Normal;
 layout(location=3) in vec3 v_Position;
+layout(location=4) in vec4 vertex_tangent_vs;
 
 layout(location=0) out vec4 vFragColor;
 
@@ -11,6 +12,7 @@ uniform sampler2D map_Kd;
 uniform sampler2D map_Ks;
 uniform sampler2D map_Ka;
 uniform sampler2D map_Ns;
+uniform sampler2D map_bump;
 
 layout(std140, binding=0) uniform BlinnPhongMaterial {
     vec4 Ka;
@@ -19,9 +21,10 @@ layout(std140, binding=0) uniform BlinnPhongMaterial {
     float Ns;
     bool use_vertex_colors;
     bool use_map_Kd;
-    bool use_map_Ks;
     bool use_map_Ka;
+    bool use_map_Ks;
     bool use_map_Ns;
+    bool use_map_bump;
     int illum;
 };
 
@@ -52,15 +55,30 @@ void main() {
     vec4 texture_color = texture(map_Kd, v_TexCoord);
 
     vec4 color = use_vertex_colors ? v_Color * Kd : Kd;
+    if (use_map_Kd) {
+        color *= texture_color;
+    }
 
     vec3 normal = normalize(v_Normal);
+
+    if (use_map_bump) {
+        vec3 tangent = vertex_tangent_vs.xyz;
+        vec3 bitangent = vertex_tangent_vs.w * cross(normal, tangent);
+        vec3 n_ts = 2.0 * texture(map_bump, v_TexCoord).rgb - 1.0;
+        normal = n_ts.x * tangent + n_ts.y * bitangent + n_ts.z * normal;
+    }
+    normal = normalize(normal);
+    
     if (!gl_FrontFacing) {
         normal = -normal;
     }
+
+
     vec3 ambient_color = Ka.rgb;
+    if (use_map_Ka) {
+        ambient_color *= texture(map_Ka, v_TexCoord).rgb;
+    }
 
-
-    color = use_map_Kd ? texture_color * color : color;
 
     vFragColor.a = color.a;
     vec3 frag_color = ambient_color * ambient;
@@ -72,7 +90,7 @@ void main() {
 
     vec3 specularColor = Ks.rgb;
     if (use_map_Ks) {
-        specularColor *= texture(map_Ks, v_TexCoord).r;
+        specularColor *= texture(map_Ks, v_TexCoord).rgb;
     }
 
     vec3 view_dir = -normalize(v_Position);
