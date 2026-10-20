@@ -102,6 +102,19 @@ public:
 		texture_bump_ = texture;
 	}
 
+    static void set_environment_map(GLuint texture) {
+        if (texture == 0) {
+            SPDLOG_ERROR("BlinnPhongMaterial::set_environment_map called with texture name 0; environment map not set");
+            environment_map_ = 0;
+            return;
+        }
+        environment_map_ = texture;
+    }
+
+	static void set_view_to_world(const glm::mat3& view_to_world) {
+		view_to_world_ = view_to_world;
+	}
+
     static void init()
     {
         create_program_in_engine({ 
@@ -133,6 +146,17 @@ public:
         OGL_CALL(map_bump_location_ = glGetUniformLocation(program(), "map_bump"));
         if (map_bump_location_ == -1) {
             SPDLOG_WARN("Cannot find map_bump uniform");
+        }
+
+        OGL_CALL(environment_map_location_ = glGetUniformLocation(program(), "environment_map"));
+        if (environment_map_location_ == -1) {
+            SPDLOG_WARN("Cannot find environment_map uniform");
+        }
+        OGL_CALL(glProgramUniform1i(program(), environment_map_location_, 5));
+        
+        OGL_CALL(view_to_world_location_ = glGetUniformLocation(program(), "view_to_world"));
+        if (view_to_world_location_ == -1) {
+            SPDLOG_WARN("Cannot find view_to_world uniform");
         }
 
         xe::add_mat_function("BlinnPhongMaterial", BlinnPhongMaterial::create_from_mtl);
@@ -189,6 +213,14 @@ public:
 			OGL_CALL(glActiveTexture(GL_TEXTURE4));
             OGL_CALL(glBindTexture(GL_TEXTURE_2D, texture_bump_));
         }
+        if (environment_map_)
+        {
+            OGL_CALL(glUniform1i(environment_map_location_, 5));
+            OGL_CALL(glActiveTexture(GL_TEXTURE5));
+            OGL_CALL(glBindTextureUnit(5, environment_map_));
+            OGL_CALL(glUniformMatrix3fv(view_to_world_location_, 1, GL_FALSE, &view_to_world_[0][0]));
+			OGL_CALL(glUniform1i(glGetUniformLocation(program(), "use_environment_map"), 1));
+        }
     }
 
     void unbind() const override
@@ -219,6 +251,15 @@ public:
 			OGL_CALL(glUniform1i(map_bump_location_, 0));
 			OGL_CALL(glBindTexture(GL_TEXTURE_2D, 0));
 		}
+        if (environment_map_)
+        {
+            OGL_CALL(glUniform1i(environment_map_location_, 0));
+            OGL_CALL(glActiveTexture(GL_TEXTURE5));
+            OGL_CALL(glBindTextureUnit(5, 0));
+            OGL_CALL(glUniformMatrix3fv(view_to_world_location_, 0, GL_FALSE, 0));
+            OGL_CALL(glUniform1i(glGetUniformLocation(program(), "use_environment_map"), 0));
+        }
+
     }
 
 private:
@@ -227,6 +268,8 @@ private:
     inline static GLint map_Ka_location_ = -1;
     inline static GLint map_Ns_location_ = -1;
     inline static GLint map_bump_location_ = -1;
+    inline static GLint environment_map_location_ = -1;
+	inline static GLint view_to_world_location_ = -1;
     int use_vertex_colors_;
     glm::vec4 Kd_, Ka_, Ks_;
     float Ns_;
@@ -236,6 +279,9 @@ private:
     GLuint texture_Ks_ = 0;
     GLuint texture_Ns_ = 0;
     GLuint texture_bump_ = 0;
+    inline static GLuint environment_map_;
     std::vector<gl::Texture> owned_textures_;
+
+    inline static glm::mat3 view_to_world_;
 };
 }

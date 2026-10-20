@@ -32,6 +32,13 @@ public:
 
     void frame() override;
 
+    void cleanup() override {
+        empty_vao_.reset();
+        skybox_program_.reset();
+        environment_map_.reset();
+        Application::cleanup();
+    }
+
     void set_camera(xe::Camera* camera) {
         camera_ = camera;
         camera_controller_.set_camera(camera_);
@@ -56,7 +63,6 @@ public:
     }
 
 private:
-    glm::mat4 M_;
     xe::Camera* camera_;
     xe::CameraController* controller_;
     xe::CameraController camera_controller_;
@@ -64,6 +70,14 @@ private:
     double mouse_y_ = 0.0;
 	xe::gl::Buffer u_trans_buffer_;
     xe::gl::Buffer u_light_buffer_handle_;
+    xe::gl::Texture environment_map_;
     std::vector<xe::PointLight> lights_;
     std::vector<xe::Mesh*> meshes_;
+
+	xe::gl::Program skybox_program_;
+	xe::gl::VertexArray empty_vao_;
+
+    inline static GLint skybox_location_ = -1;
+    inline static GLint inverse_PV_rotation_location_ = -1;
+
 };

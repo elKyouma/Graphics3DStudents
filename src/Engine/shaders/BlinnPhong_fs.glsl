@@ -14,6 +14,10 @@ uniform sampler2D map_Ka;
 uniform sampler2D map_Ns;
 uniform sampler2D map_bump;
 
+uniform samplerCube environment_map;
+uniform bool use_environment_map;
+uniform mat3 view_to_world;
+
 layout(std140, binding=0) uniform BlinnPhongMaterial {
     vec4 Ka;
     vec4 Kd;
@@ -106,11 +110,16 @@ void main() {
         float specular = pow(max(dot(half_vector, normal), 0.0), shininess);
         float diffuse = max(dot(normal, light_dir), 0.0);
         vec3 light_energy =  lights[i].color * lights[i].intensity * attenuation * diffuse;
-        if(illum == 2)
+        if(illum >= 2)
         {
             frag_color += (shininess + 8.0) * INV_PI / 8 * specular * specularColor.rgb * light_energy;
         }
+
         frag_color += INV_PI * color.rgb * light_energy;
+    }
+    if (illum == 3 && use_environment_map) {
+        vec3 reflected_vs = reflect(-view_dir, normal);
+        frag_color += specularColor * texture(environment_map, view_to_world * reflected_vs).rgb;
     }
     vFragColor.rgb = srgb_gamma_correction(frag_color);
 }

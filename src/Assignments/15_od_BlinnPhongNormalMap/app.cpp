@@ -34,7 +34,7 @@ void SimpleShapeApplication::init() {
 
 
     OGL_CALL(glCreateBuffers(1, u_trans_buffer_.put()));
-    OGL_CALL(glNamedBufferData(u_trans_buffer_.get(), 44 * sizeof(float), 0, GL_DYNAMIC_DRAW));
+    OGL_CALL(glNamedBufferData(u_trans_buffer_.get(), 48 * sizeof(float), 0, GL_DYNAMIC_DRAW));
 
     OGL_CALL(glCreateBuffers(1, u_light_buffer_handle_.put()));
     OGL_CALL(glNamedBufferData(u_light_buffer_handle_.get(), 66 * sizeof(float), 0, GL_DYNAMIC_DRAW));
@@ -106,13 +106,13 @@ void SimpleShapeApplication::frame() {
     glm::mat4 PVM = camera()->projection() * VM;
 
     auto R = glm::mat3(VM);
-    auto VM_normal = glm::mat3(glm::cross(R[1], R[2]), glm::cross(R[2], R[0]), glm::cross(R[0], R[1]));
+    auto VM_normal = glm::mat4(glm::mat3(glm::cross(R[1], R[2]), glm::cross(R[2], R[0]), glm::cross(R[0], R[1])));
 
     glm::vec3 ambient = {0.1, 0.1, 0.1};
 
     OGL_CALL(glNamedBufferSubData(u_trans_buffer_.get(), 0, 16 * sizeof(float), &PVM));
     OGL_CALL(glNamedBufferSubData(u_trans_buffer_.get(), 16 * sizeof(float), 16 * sizeof(float), &VM));
-    OGL_CALL(glNamedBufferSubData(u_trans_buffer_.get(), 32 * sizeof(float), 12 * sizeof(float), &VM));
+    OGL_CALL(glNamedBufferSubData(u_trans_buffer_.get(), 32 * sizeof(float), 16 * sizeof(float), &VM_normal));
     OGL_CALL(glBindBufferBase(GL_UNIFORM_BUFFER, 1, u_trans_buffer_.get()));
 
     int n_lights = static_cast<int>(std::min<std::size_t>(lights_.size(), xe::MAX_POINT_LIGHTS));

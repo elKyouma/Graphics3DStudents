@@ -76,6 +76,12 @@ namespace xe {
 
         };
 
+		void set_model_matrix(const glm::mat4& model_matrix) {
+			model_matrix_ = model_matrix;
+		}
+		glm::mat4 model_matrix() const {
+			return model_matrix_;
+		}
 
     private:
         GLuint index_size_;
@@ -85,6 +91,7 @@ namespace xe {
         gl::Buffer i_buffer_;
         const GLenum index_type_;
         const GLsizei stride_;
+		glm::mat4 model_matrix_ = glm::mat4(1.0f);
 
         std::vector<SubMesh> submeshes_;
 
