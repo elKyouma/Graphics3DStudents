@@ -93,31 +93,18 @@ void SimpleShapeApplication::init() {
     // This sets up a Vertex Array Object (VAO) that encapsulates
     // the state of all vertex buffers needed for rendering.
     // The vao_ variable is a member of the SimpleShapeApplication class and is defined in app.h.
-    OGL_CALL(glGenVertexArrays(1, &vao_));
-    OGL_CALL(glBindVertexArray(vao_));
-    OGL_CALL(glBindBuffer(GL_ARRAY_BUFFER, v_buffer_handle));
+    OGL_CALL(glCreateVertexArrays(1, &vao_));
 
-    /*
-     * The following lines bind the vertex attribute 0 to the currently bound vertex buffer (the one we just created).
-     * Attribute 0 is specified in the vertex shader with the
-     * layout (location = 0) in vec4 a_vertex_position;
-     * directive.
-     */
-     // This specifies that the data for attribute 0 should be read from a vertex buffer
-    OGL_CALL(glEnableVertexAttribArray(0));
-    OGL_CALL(glEnableVertexAttribArray(1));
-    // and this specifies the data layout in the buffer.
-    OGL_CALL(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat),
-        reinterpret_cast<GLvoid*>(0)));
-    OGL_CALL(glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat),
-        reinterpret_cast<GLvoid*>(3 * sizeof(GLfloat))));
+    OGL_CALL(glVertexArrayVertexBuffer(vao_, 0, v_buffer_handle, 0, 6 * sizeof(GLfloat)));
+    OGL_CALL(glVertexArrayElementBuffer(vao_, i_buffer_handle));
 
+    OGL_CALL(glEnableVertexArrayAttrib(vao_, 0));
+    OGL_CALL(glVertexArrayAttribFormat(vao_, 0, 3, GL_FLOAT, GL_FALSE, 0));
+    OGL_CALL(glVertexArrayAttribBinding(vao_, 0, 0));
 
-    OGL_CALL(glBindBuffer(GL_ARRAY_BUFFER, 0));
-    OGL_CALL(glBindBuffer(GL_ARRAY_BUFFER, 1));
-    OGL_CALL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, i_buffer_handle));
-    OGL_CALL(glBindVertexArray(0));
-    //end of vao "recording"
+    OGL_CALL(glEnableVertexArrayAttrib(vao_, 1));
+    OGL_CALL(glVertexArrayAttribFormat(vao_, 1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat)));
+    OGL_CALL(glVertexArrayAttribBinding(vao_, 1, 0));
 
     // Setting the background color of the rendering window,
     // I suggest not using white or black for better debugging.

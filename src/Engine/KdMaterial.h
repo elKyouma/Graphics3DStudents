@@ -62,7 +62,7 @@ public:
         xe::add_mat_function("KdMaterial", KdMaterial::create_from_mtl);
     }
 
-    void KdMaterial::bind() const {
+    void bind() const override {
         OGL_CALL(glUseProgram(program()));
 
         OGL_CALL(glBindBufferBase(GL_UNIFORM_BUFFER, 0, material_uniform_buffer()));

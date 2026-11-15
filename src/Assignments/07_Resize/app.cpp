@@ -71,6 +71,12 @@ void SimpleShapeApplication::init() {
     near_ = 0.1f;
     far_ = 20.0f;
 
+    V_ = glm::lookAt(
+        glm::vec3(2.0f, 1.0f, 2.0f),
+        glm::vec3(0.0f, 0.0f, 0.0f),
+        glm::vec3(0.0f, 0.0f, 1.0f)
+    );
+    M_ = glm::mat4(1.0f);
 
     /*
      * All the calls to the OpenGL API are "encapsulated" in the OGL_CALL macro for debugging purposes as explained in
@@ -96,31 +102,18 @@ void SimpleShapeApplication::init() {
     // This sets up a Vertex Array Object (VAO) that encapsulates
     // the state of all vertex buffers needed for rendering.
     // The vao_ variable is a member of the SimpleShapeApplication class and is defined in app.h.
-    OGL_CALL(glGenVertexArrays(1, &vao_));
-    OGL_CALL(glBindVertexArray(vao_));
-    OGL_CALL(glBindBuffer(GL_ARRAY_BUFFER, v_buffer_handle));
+    OGL_CALL(glCreateVertexArrays(1, &vao_));
 
-    /*
-     * The following lines bind the vertex attribute 0 to the currently bound vertex buffer (the one we just created).
-     * Attribute 0 is specified in the vertex shader with the
-     * layout (location = 0) in vec4 a_vertex_position;
-     * directive.
-     */
-     // This specifies that the data for attribute 0 should be read from a vertex buffer
-    OGL_CALL(glEnableVertexAttribArray(0));
-    OGL_CALL(glEnableVertexAttribArray(1));
-    // and this specifies the data layout in the buffer.
-    OGL_CALL(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat),
-        reinterpret_cast<GLvoid*>(0)));
-    OGL_CALL(glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat),
-        reinterpret_cast<GLvoid*>(3 * sizeof(GLfloat))));
+    OGL_CALL(glVertexArrayVertexBuffer(vao_, 0, v_buffer_handle, 0, 6 * sizeof(GLfloat)));
+    OGL_CALL(glVertexArrayElementBuffer(vao_, i_buffer_handle));
 
+    OGL_CALL(glEnableVertexArrayAttrib(vao_, 0));
+    OGL_CALL(glVertexArrayAttribFormat(vao_, 0, 3, GL_FLOAT, GL_FALSE, 0));
+    OGL_CALL(glVertexArrayAttribBinding(vao_, 0, 0));
 
-    OGL_CALL(glBindBuffer(GL_ARRAY_BUFFER, 0));
-    OGL_CALL(glBindBuffer(GL_ARRAY_BUFFER, 1));
-    OGL_CALL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, i_buffer_handle));
-    OGL_CALL(glBindVertexArray(0));
-    //end of vao "recording"
+    OGL_CALL(glEnableVertexArrayAttrib(vao_, 1));
+    OGL_CALL(glVertexArrayAttribFormat(vao_, 1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat)));
+    OGL_CALL(glVertexArrayAttribBinding(vao_, 1, 0));
 
     // Setting the background color of the rendering window,
     // I suggest not using white or black for better debugging.
@@ -147,13 +140,7 @@ void SimpleShapeApplication::framebuffer_resize_callback(int w, int h) {
 void SimpleShapeApplication::frame() {
     // Binding the VAO will set up all the required vertex attribute arrays.
     OGL_CALL(glBindVertexArray(vao_));
-    V_ = glm::lookAt(
-        glm::vec3(2.0f, 1.0f, 2.0f),
-        glm::vec3(0.0f, 0.0f, 0.0f),
-        glm::vec3(0.0f, 0.0f, 1.0f)
-    );
     P_ = glm::perspective(fov_, aspect_, near_, far_);
-    M_ = glm::translate(glm::mat4(1.0), glm::vec3(0.0f, 0.0f, 0.0f));
     glm::mat4 PVM = P_ * V_ * M_;
     OGL_CALL(glNamedBufferSubData(u_trans_buffer_handle_, 0, 16 * sizeof(float), &PVM));
     OGL_CALL(glBindBufferBase(GL_UNIFORM_BUFFER, 1, u_trans_buffer_handle_));

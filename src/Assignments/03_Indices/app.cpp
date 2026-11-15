@@ -89,7 +89,6 @@ void SimpleShapeApplication::init() {
 
 
     OGL_CALL(glBindBuffer(GL_ARRAY_BUFFER, 0));
-    OGL_CALL(glBindBuffer(GL_ARRAY_BUFFER, 1));
     OGL_CALL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, i_buffer_handle));
     OGL_CALL(glBindVertexArray(0));
     //end of vao "recording"
